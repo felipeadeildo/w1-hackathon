@@ -46,8 +46,8 @@ export const EconomySimulator = () => {
   ]
 
   return (
-    <Card className='w-full shadow-lg'>
-      <CardHeader className='bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-t-lg'>
+    <Card className='w-full shadow-lg py-0'>
+      <CardHeader className='bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-t-lg py-2 shadow-lg'>
         <CardTitle className='text-2xl font-light'>Simulador de Economia</CardTitle>
         <CardDescription className='text-primary-foreground/80'>
           Descubra quanto você pode economizar com uma holding patrimonial
@@ -97,16 +97,18 @@ export const EconomySimulator = () => {
         </div>
 
         <Tabs defaultValue='succession' className='mt-6'>
-          <TabsList className='grid grid-cols-2 mb-4'>
-            <TabsTrigger value='succession' className='flex items-center gap-1'>
-              <Users size={14} />
-              <span>Sucessão Patrimonial</span>
-            </TabsTrigger>
-            <TabsTrigger value='monthly' className='flex items-center gap-1'>
-              <Percent size={14} />
-              <span>Economia Mensal</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className='flex justify-center w-full'>
+            <TabsList className='grid grid-cols-2 mb-4 w-fit'>
+              <TabsTrigger value='succession' className='flex items-center gap-1'>
+                <Users size={14} />
+                <span>Sucessão Patrimonial</span>
+              </TabsTrigger>
+              <TabsTrigger value='monthly' className='flex items-center gap-1'>
+                <Percent size={14} />
+                <span>Economia Mensal</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value='succession' className='space-y-4'>
             <div className='bg-muted p-4 rounded-lg'>
