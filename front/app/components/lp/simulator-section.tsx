@@ -1,6 +1,6 @@
 import { BarChart3, LineChart, PieChart } from 'lucide-react'
 
-const SimulatorSection = ({ children }: { children: React.ReactNode }) => {
+export const SimulatorSection = ({ children }: { children: React.ReactNode }) => {
   return (
     <div id='simulator' className='py-16 bg-muted scroll-mt-16'>
       <div className='container mx-auto px-4'>
@@ -21,5 +21,3 @@ const SimulatorSection = ({ children }: { children: React.ReactNode }) => {
     </div>
   )
 }
-
-export default SimulatorSection
