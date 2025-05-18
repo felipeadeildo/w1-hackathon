@@ -5,11 +5,8 @@ export const Header = () => {
   return (
     <header id='header' className='py-4 border-b border-border sticky top-0 bg-background z-50'>
       <div className='container mx-auto px-4 flex justify-between items-center'>
-        <div className='text-2xl font-medium text-primary flex items-center gap-2'>
-          <div className='h-8 w-8 rounded-full bg-primary flex items-center justify-center'>
-            <span className='text-primary-foreground text-sm font-bold'>W1</span>
-          </div>
-          W1 Capital
+        <div className='flex items-center'>
+          <img src='w1-tagline.png' alt='W1 Capital Logo' className='h-10' />
         </div>
         <nav className='hidden md:flex gap-6'>
           <a href='#hero' className='text-foreground hover:text-primary flex items-center gap-1'>

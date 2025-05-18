@@ -11,11 +11,8 @@ export const Footer = () => {
       <div className='container mx-auto px-4'>
         <div className='grid md:grid-cols-4 gap-8'>
           <div>
-            <div className='flex items-center gap-2 mb-4'>
-              <div className='h-8 w-8 rounded-full bg-primary flex items-center justify-center'>
-                <span className='text-primary-foreground text-sm font-bold'>W1</span>
-              </div>
-              <h3 className='text-lg font-medium'>W1 Capital</h3>
+            <div className='mb-4'>
+              <img src='w1-tagline.png' alt='W1 Capital Logo' className='h-10' />
             </div>
             <p className='mb-6 text-secondary-foreground/80'>
               Soluções em consultoria patrimonial para proteger e otimizar seu patrimônio.
