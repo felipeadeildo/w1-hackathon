@@ -1,13 +1,4 @@
-import {
-  ArrowRight,
-  BarChart,
-  Clock,
-  DollarSign,
-  Home,
-  Landmark,
-  Percent,
-  Users,
-} from 'lucide-react'
+import { ArrowRight, Link as LinkIcon, Percent, Users } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import {
@@ -18,15 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from '~/components/ui/card'
-import { Input } from '~/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { MonthlyTab } from './economy-simulator/monthly-tab'
+import { SimulationForm } from './economy-simulator/simulation-form'
+import { SuccessionTab } from './economy-simulator/succession-tab'
 
 export const EconomySimulator = () => {
   const [patrimonyValue, setPatrimonyValue] = useState(1000000)
   const [rentalIncome, setRentalIncome] = useState(10000)
   const [heirs, setHeirs] = useState(2)
-
-  // TODO: definir variáveis reais para o cálculo
 
   // Cálculos simplificados para demonstração
   const traditionalTaxCost = patrimonyValue * 0.15 // 15% em custos de inventário
@@ -38,186 +29,95 @@ export const EconomySimulator = () => {
   const monthlySavings = monthlyTaxTraditional - monthlyTaxHolding
   const yearlySavings = monthlySavings * 12
 
-  const data = [
+  const timeData = [
     { year: 1, savings: yearlySavings },
+    { year: 3, savings: yearlySavings * 3 },
     { year: 5, savings: yearlySavings * 5 },
     { year: 10, savings: yearlySavings * 10 },
+    { year: 15, savings: yearlySavings * 15 },
     { year: 20, savings: yearlySavings * 20 },
   ]
 
   return (
     <Card className='w-full shadow-lg py-0'>
-      <CardHeader className='bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-t-lg py-2 shadow-lg'>
-        <CardTitle className='text-2xl font-light'>Simulador de Economia</CardTitle>
-        <CardDescription className='text-primary-foreground/80'>
-          Descubra quanto você pode economizar com uma holding patrimonial
-        </CardDescription>
+      <CardHeader className='bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-t-lg py-2 px-4'>
+        <div className='flex items-center justify-between'>
+          <div>
+            <CardTitle className='text-xl font-light'>Simulador de Economia</CardTitle>
+            <CardDescription className='text-primary-foreground/80 text-xs'>
+              Descubra quanto você pode economizar com uma holding patrimonial
+            </CardDescription>
+          </div>
+          <a href='#contact'>
+            <Button
+              variant='outline'
+              size='sm'
+              className='bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground'
+            >
+              <LinkIcon size={14} className='mr-1' />
+              <span className='text-xs'>Fale com um consultor</span>
+            </Button>
+          </a>
+        </div>
       </CardHeader>
-      <CardContent className='p-6 space-y-6'>
-        <div className='space-y-4'>
-          <div>
-            <label className='text-sm font-medium text-muted-foreground mb-1 flex items-center gap-2'>
-              <Home size={16} />
-              <span>Valor total do patrimônio</span>
-            </label>
-            <div className='relative'>
-              <span className='absolute left-3 top-3 text-muted-foreground'>R$</span>
-              <Input
-                type='number'
-                value={patrimonyValue}
-                onChange={(e) => setPatrimonyValue(Number(e.target.value))}
-                className='pl-10'
-              />
-            </div>
+
+      <CardContent className='p-4'>
+        <div className='grid md:grid-cols-5 gap-6'>
+          <div className='md:col-span-2'>
+            <h3 className='text-sm font-medium mb-3'>Informe seus dados</h3>
+            <SimulationForm
+              patrimonyValue={patrimonyValue}
+              setPatrimonyValue={setPatrimonyValue}
+              rentalIncome={rentalIncome}
+              setRentalIncome={setRentalIncome}
+              heirs={heirs}
+              setHeirs={setHeirs}
+            />
           </div>
 
-          <div>
-            <label className='text-sm font-medium text-muted-foreground mb-1 flex items-center gap-2'>
-              <Landmark size={16} />
-              <span>Renda mensal com aluguéis</span>
-            </label>
-            <div className='relative'>
-              <span className='absolute left-3 top-3 text-muted-foreground'>R$</span>
-              <Input
-                type='number'
-                value={rentalIncome}
-                onChange={(e) => setRentalIncome(Number(e.target.value))}
-                className='pl-10'
-              />
-            </div>
-          </div>
+          <div className='md:col-span-3'>
+            <h3 className='text-sm font-medium mb-3'>Resultados da simulação</h3>
+            <Tabs defaultValue='succession' className='mt-2'>
+              <TabsList className='grid grid-cols-2 mb-3 w-full'>
+                <TabsTrigger value='succession' className='flex items-center gap-1 text-xs py-1.5'>
+                  <Users size={12} />
+                  <span>Sucessão Patrimonial</span>
+                </TabsTrigger>
+                <TabsTrigger value='monthly' className='flex items-center gap-1 text-xs py-1.5'>
+                  <Percent size={12} />
+                  <span>Economia Mensal</span>
+                </TabsTrigger>
+              </TabsList>
 
-          <div>
-            <label className='text-sm font-medium text-muted-foreground mb-1 flex items-center gap-2'>
-              <Users size={16} />
-              <span>Número de herdeiros</span>
-            </label>
-            <Input type='number' value={heirs} onChange={(e) => setHeirs(Number(e.target.value))} />
+              <TabsContent value='succession'>
+                <SuccessionTab
+                  traditionalTaxCost={traditionalTaxCost}
+                  holdingTaxCost={holdingTaxCost}
+                  savingsAmount={savingsAmount}
+                />
+              </TabsContent>
+
+              <TabsContent value='monthly'>
+                <MonthlyTab
+                  monthlyTaxTraditional={monthlyTaxTraditional}
+                  monthlyTaxHolding={monthlyTaxHolding}
+                  monthlySavings={monthlySavings}
+                  yearlySavings={yearlySavings}
+                  timeData={timeData}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
-
-        <Tabs defaultValue='succession' className='mt-6'>
-          <div className='flex justify-center w-full'>
-            <TabsList className='grid grid-cols-2 mb-4 w-fit'>
-              <TabsTrigger value='succession' className='flex items-center gap-1'>
-                <Users size={14} />
-                <span>Sucessão Patrimonial</span>
-              </TabsTrigger>
-              <TabsTrigger value='monthly' className='flex items-center gap-1'>
-                <Percent size={14} />
-                <span>Economia Mensal</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value='succession' className='space-y-4'>
-            <div className='bg-muted p-4 rounded-lg'>
-              <div className='flex justify-between items-center mb-2'>
-                <span className='text-muted-foreground flex items-center gap-1'>
-                  <DollarSign size={14} />
-                  <span>Custo de inventário tradicional:</span>
-                </span>
-                <span className='text-foreground font-medium'>
-                  R$ {traditionalTaxCost.toLocaleString('pt-BR')}
-                </span>
-              </div>
-              <div className='flex justify-between items-center mb-2'>
-                <span className='text-muted-foreground flex items-center gap-1'>
-                  <DollarSign size={14} />
-                  <span>Custo com holding patrimonial:</span>
-                </span>
-                <span className='text-foreground font-medium'>
-                  R$ {holdingTaxCost.toLocaleString('pt-BR')}
-                </span>
-              </div>
-              <div className='flex justify-between items-center pt-2 border-t border-border'>
-                <span className='text-foreground font-medium flex items-center gap-1'>
-                  <BarChart size={14} />
-                  <span>Sua economia:</span>
-                </span>
-                <span className='text-accent-foreground font-bold text-xl'>
-                  R$ {savingsAmount.toLocaleString('pt-BR')}
-                </span>
-              </div>
-            </div>
-
-            <div className='flex gap-2 items-center text-primary'>
-              <Clock size={16} />
-              <span className='text-sm'>
-                Proteja o patrimônio da sua família e evite processos demorados de inventário
-              </span>
-            </div>
-          </TabsContent>
-
-          <TabsContent value='monthly' className='space-y-4'>
-            <div className='bg-muted p-4 rounded-lg'>
-              <div className='flex justify-between items-center mb-2'>
-                <span className='text-muted-foreground flex items-center gap-1'>
-                  <DollarSign size={14} />
-                  <span>Imposto mensal atual:</span>
-                </span>
-                <span className='text-foreground font-medium'>
-                  R$ {monthlyTaxTraditional.toLocaleString('pt-BR')}
-                </span>
-              </div>
-              <div className='flex justify-between items-center mb-2'>
-                <span className='text-muted-foreground flex items-center gap-1'>
-                  <DollarSign size={14} />
-                  <span>Imposto mensal com holding:</span>
-                </span>
-                <span className='text-foreground font-medium'>
-                  R$ {monthlyTaxHolding.toLocaleString('pt-BR')}
-                </span>
-              </div>
-              <div className='flex justify-between items-center pt-2 border-t border-border'>
-                <span className='text-foreground font-medium flex items-center gap-1'>
-                  <BarChart size={14} />
-                  <span>Economia mensal:</span>
-                </span>
-                <span className='text-accent-foreground font-bold'>
-                  R$ {monthlySavings.toLocaleString('pt-BR')}
-                </span>
-              </div>
-              <div className='flex justify-between items-center pt-2 border-t border-border mt-2'>
-                <span className='text-foreground font-medium flex items-center gap-1'>
-                  <BarChart size={14} />
-                  <span>Economia anual:</span>
-                </span>
-                <span className='text-accent-foreground font-bold text-xl'>
-                  R$ {yearlySavings.toLocaleString('pt-BR')}
-                </span>
-              </div>
-            </div>
-
-            <div className='h-64 mt-6 relative'>
-              {/* Aqui usaríamos o recharts para criar um gráfico real */}
-              <div className='absolute inset-0 flex items-end justify-between px-4'>
-                {data.map((item, index) => (
-                  <div key={index} className='flex flex-col items-center'>
-                    <div
-                      className='bg-primary w-16 rounded-t-md'
-                      style={{
-                        height: `${Math.min(100, (item.savings / (yearlySavings * 20)) * 180)}px`,
-                      }}
-                    ></div>
-                    <div className='text-sm font-medium mt-2 text-foreground'>
-                      {item.year} {item.year === 1 ? 'ano' : 'anos'}
-                    </div>
-                    <div className='text-xs text-muted-foreground'>
-                      R$ {item.savings.toLocaleString('pt-BR')}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
       </CardContent>
-      <CardFooter className='bg-muted px-6 py-4 border-t rounded-b-lg'>
-        <Button variant='default' className='w-full group'>
-          <span>Simule sua economia personalizada</span>
-          <ArrowRight size={16} className='ml-2 group-hover:translate-x-1 transition-transform' />
-        </Button>
+
+      <CardFooter className='bg-muted px-4 py-3 border-t'>
+        <a href='#contact' className='w-full'>
+          <Button variant='default' className='w-full group'>
+            <span>Simule sua economia personalizada</span>
+            <ArrowRight size={16} className='ml-2 group-hover:translate-x-1 transition-transform' />
+          </Button>
+        </a>
       </CardFooter>
     </Card>
   )

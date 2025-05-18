@@ -16,7 +16,7 @@ const SimulatorSection = ({ children }: { children: React.ReactNode }) => {
             patrimonial
           </p>
         </div>
-        <div className='max-w-3xl mx-auto'>{children}</div>
+        <div className='max-w-5xl mx-auto'>{children}</div>
       </div>
     </div>
   )
