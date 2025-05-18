@@ -24,7 +24,7 @@ export const FinalCTA = () => {
           <Button
             variant='outline'
             size='lg'
-            className='border-primary-foreground text-primary-foreground hover:bg-primary/90 flex items-center gap-2'
+            className='bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground flex items-center gap-2'
           >
             <Calculator size={18} />
             <span>Simular agora</span>
