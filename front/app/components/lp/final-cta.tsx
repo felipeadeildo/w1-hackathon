@@ -16,19 +16,23 @@ export const FinalCTA = () => {
           holding patrimonial pode beneficiar você e sua família.
         </p>
         <div className='flex flex-col sm:flex-row justify-center gap-4'>
-          <Button size='lg' variant='secondary' className='group flex items-center gap-2'>
-            <PhoneCall size={18} />
-            <span>Falar com um consultor</span>
-            <ArrowRight size={16} className='group-hover:translate-x-1 transition-transform' />
-          </Button>
-          <Button
-            variant='outline'
-            size='lg'
-            className='bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground flex items-center gap-2'
-          >
-            <Calculator size={18} />
-            <span>Simular agora</span>
-          </Button>
+          <a href='#contact' className='contents'>
+            <Button size='lg' variant='secondary' className='group flex items-center gap-2'>
+              <PhoneCall size={18} />
+              <span>Falar com um consultor</span>
+              <ArrowRight size={16} className='group-hover:translate-x-1 transition-transform' />
+            </Button>
+          </a>
+          <a href='#simulator' className='contents'>
+            <Button
+              variant='outline'
+              size='lg'
+              className='bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground flex items-center gap-2'
+            >
+              <Calculator size={18} />
+              <span>Simular agora</span>
+            </Button>
+          </a>
         </div>
 
         <div className='mt-10 bg-primary-foreground/10 rounded-lg p-6 max-w-md mx-auto backdrop-blur-sm'>

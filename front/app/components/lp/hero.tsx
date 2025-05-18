@@ -41,20 +41,24 @@ export const Hero = () => {
             </div>
 
             <div className='flex flex-col sm:flex-row gap-4'>
-              <Button size='lg' variant='secondary' className='group'>
-                <span>Simular Economia</span>
-                <ArrowRight
-                  size={16}
-                  className='ml-2 group-hover:translate-x-1 transition-transform'
-                />
-              </Button>
-              <Button
-                size='lg'
-                variant='outline'
-                className='bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground'
-              >
-                Saiba Mais
-              </Button>
+              <a href='#simulator' className='contents'>
+                <Button size='lg' variant='secondary' className='group'>
+                  <span>Simular Economia</span>
+                  <ArrowRight
+                    size={16}
+                    className='ml-2 group-hover:translate-x-1 transition-transform'
+                  />
+                </Button>
+              </a>
+              <a href='#benefits' className='contents'>
+                <Button
+                  size='lg'
+                  variant='outline'
+                  className='bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground'
+                >
+                  Saiba Mais
+                </Button>
+              </a>
             </div>
           </div>
           <div className='md:w-1/2 mt-10 md:mt-0'>
