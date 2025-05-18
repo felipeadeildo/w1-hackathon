@@ -1,17 +1,24 @@
-import { Welcome } from "../welcome/welcome";
-import type { Route } from "./+types/home";
+import { Button } from '~/components/ui/button'
 
+import { AlertTriangle } from 'lucide-react'
+import type { Route } from './+types/home'
+
+// eslint-disable-next-line no-empty-pattern
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
+    { title: 'W1 Hackathon' },
+    { name: 'description', content: 'W1 Hackathon' },
+  ]
 }
 
-export function clientLoader({ context }: Route.LoaderArgs) {
-  return { message: "Hello from Vercel" };
-}
-
-export default function Home({ loaderData }: Route.ComponentProps) {
-  return <Welcome message={loaderData.message} />;
+export default function Home() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-svh">
+      <div className="flex items-center gap-2 mb-4 p-2 bg-yellow-100 rounded text-yellow-800">
+        <AlertTriangle size={18} />
+        <span>In Development</span>
+      </div>
+      <Button>Click me</Button>
+    </div>
+  )
 }
