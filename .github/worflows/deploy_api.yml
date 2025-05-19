@@ -1,0 +1,33 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy API Service
+    runs-on: self-hosted
+    environment: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up environment variables
+        run: |
+          echo "API_PORT=${{ secrets.API_PORT }}" >> .env
+
+      - name: Stop and remove containers
+        run: |
+          docker compose down
+          docker compose rm -f
+        continue-on-error: true
+
+      - name: Build and start containers
+        run: |
+          docker compose up -d --build
+
+      - name: Check containers are running
+        run: docker compose ps
