@@ -37,7 +37,7 @@ class UserProfile(TimeStampModel, table=True):
 
     user_id: uuid.UUID = Field(foreign_key="user.id", primary_key=True)
     full_name: str
-    cpf: str = Field(index=True)
+    cpf: str | None = Field(default=None, index=True)
     rg: str | None = None
     date_of_birth: datetime | None = None
     phone_number: str | None = None

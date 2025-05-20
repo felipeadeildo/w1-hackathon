@@ -17,8 +17,8 @@ router = APIRouter(
 )
 
 
-@router.post("/signup", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-async def signup(user: UserCreate, session: Annotated[Session, Depends(get_session)]) -> User:
+@router.post("/signup", response_model=Token, status_code=status.HTTP_201_CREATED)
+async def signup(user: UserCreate, session: Annotated[Session, Depends(get_session)]) -> Token:
     """Cria um novo usuário"""
     # Verifica se o email já existe
     existing_user = get_user_by_email(session, user.email)
@@ -35,8 +35,11 @@ async def signup(user: UserCreate, session: Annotated[Session, Depends(get_sessi
         session=session,
         email=user.email,
         password=user.password,
+        name=user.name,
     )
-    return db_user
+
+    access_token = create_access_token(db_user.id)
+    return Token(access_token=access_token)
 
 
 @router.get("/me", response_model=UserRead)

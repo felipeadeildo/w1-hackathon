@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 
 from core.security import get_password_hash, verify_password
-from models.user import User
+from models.user import User, UserProfile
 
 
 def get_user_by_email(session: Session, email: str) -> User | None:
@@ -15,15 +15,21 @@ async def create_user(
     session: Session,
     email: str,
     password: str,
+    name: str,
     is_consultant: bool = False,
 ) -> User:
-    """Cria um novo usuário"""
+    """Cria um novo usuário com perfil"""
     user = User(
         email=email,
         hashed_password=get_password_hash(password),
         is_consultant=is_consultant,
     )
     session.add(user)
+    session.flush()  # Ensure user.id is available
+
+    # Create user profile
+    profile = UserProfile(user_id=user.id, full_name=name)
+    session.add(profile)
     session.commit()
     session.refresh(user)
     return user
