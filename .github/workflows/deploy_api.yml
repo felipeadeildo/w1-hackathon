@@ -29,5 +29,17 @@ jobs:
         run: |
           docker compose up -d --build
 
-      - name: Check containers are running
-        run: docker compose ps
+      - name: Run healthcheck
+        run: |
+          for i in $(seq 1 10); do
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' api)
+            if [ "$STATUS" = "healthy" ]; then
+              echo "API está saudável."
+              exit 0
+            fi
+            echo "Aguardando healthcheck… ($i/10)"
+            sleep 3
+          done
+          echo "❌ API container não ficou healthy." >&2
+          docker logs api >&2 || true
+          exit 1
