@@ -1,10 +1,9 @@
-import { ArrowRight, Calculator, Coins, Shield } from 'lucide-react'
+import { ArrowRight, Calculator, Coins, Shield, User } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { Button } from '~/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { LoginForm } from './LoginForm'
-import { SignupForm } from './SignupForm'
 
 export const Hero = () => {
+  const navigate = useNavigate()
   return (
     <div
       id='hero'
@@ -63,23 +62,22 @@ export const Hero = () => {
               </a>
             </div>
           </div>
-          <div className='md:w-1/2 mt-10 md:mt-0'>
-            <div className='bg-card p-6 rounded-lg shadow-lg text-card-foreground'>
-              <Tabs defaultValue='login' className='space-y-4'>
-                <div className='flex justify-between items-center mb-4'>
-                  <h3 className='text-xl font-medium'>Acesso à Plataforma</h3>
-                  <TabsList>
-                    <TabsTrigger value='login'>Login</TabsTrigger>
-                    <TabsTrigger value='signup'>Primeiro acesso</TabsTrigger>
-                  </TabsList>
+          <div className='md:w-1/2 mt-10 md:mt-0 flex items-center justify-center'>
+            <div className='bg-card p-12 rounded-lg shadow-lg text-card-foreground'>
+              <div className='flex flex-col items-center space-y-6'>
+                <div className='p-4 bg-primary/10 rounded-full'>
+                  <User size={48} className='text-primary' />
                 </div>
-                <TabsContent value='login'>
-                  <LoginForm />
-                </TabsContent>
-                <TabsContent value='signup'>
-                  <SignupForm />
-                </TabsContent>
-              </Tabs>
+                <div className='text-center'>
+                  <h3 className='text-xl font-medium'>Área do Cliente</h3>
+                  <p className='text-muted-foreground mt-2'>
+                    Acesse sua conta para gerenciar seu patrimônio
+                  </p>
+                </div>
+                <Button size='lg' onClick={() => navigate('/app')} className='w-full'>
+                  Acessar Plataforma
+                </Button>
+              </div>
             </div>
           </div>
         </div>

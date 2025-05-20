@@ -1,7 +1,10 @@
 import { Award, HelpCircle, Home, PhoneCall, User } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { Button } from '~/components/ui/button'
 
 export const Header = () => {
+  const navigate = useNavigate()
+
   return (
     <header id='header' className='py-4 border-b border-border sticky top-0 bg-background z-50'>
       <div className='container mx-auto px-4 flex justify-between items-center'>
@@ -32,7 +35,11 @@ export const Header = () => {
             <span>Contato</span>
           </a>
         </nav>
-        <Button variant='outline' className='flex items-center gap-1'>
+        <Button
+          variant='outline'
+          className='flex items-center gap-1'
+          onClick={() => navigate('/app')}
+        >
           <User size={16} />
           <span>Área do Cliente</span>
         </Button>

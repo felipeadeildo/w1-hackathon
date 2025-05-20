@@ -1,3 +1,4 @@
+import type { User } from '~/types/user'
 import httpClient, { AUTH_TOKEN_KEY } from './httpClient'
 
 interface LoginCredentials {
@@ -51,4 +52,16 @@ export const signup = async (credentials: SignupCredentials): Promise<SignupResp
   }
 
   return response.data
+}
+
+export const getCurrentUser = async (): Promise<User> => {
+  const response = await httpClient.get<User>('/users/me')
+  if (!response.success) {
+    throw new Error(response.detail)
+  }
+  return response.data
+}
+
+export const logout = () => {
+  localStorage.removeItem(AUTH_TOKEN_KEY)
 }
