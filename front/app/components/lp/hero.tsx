@@ -1,6 +1,8 @@
-import { ArrowRight, Calculator, ChevronRight, Coins, Lock, Mail, Shield } from 'lucide-react'
+import { ArrowRight, Calculator, Coins, Shield } from 'lucide-react'
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { LoginForm } from './LoginForm'
+import { SignupForm } from './SignupForm'
 
 export const Hero = () => {
   return (
@@ -63,39 +65,21 @@ export const Hero = () => {
           </div>
           <div className='md:w-1/2 mt-10 md:mt-0'>
             <div className='bg-card p-6 rounded-lg shadow-lg text-card-foreground'>
-              <h3 className='text-xl font-medium mb-4'>Acesso à Plataforma</h3>
-              <div className='space-y-4'>
-                <div>
-                  <label className='text-sm font-medium text-muted-foreground block mb-1'>
-                    Email
-                  </label>
-                  <div className='relative'>
-                    <Mail size={16} className='absolute left-3 top-3 text-muted-foreground' />
-                    <Input type='email' placeholder='seu@email.com' className='pl-10' />
-                  </div>
+              <Tabs defaultValue='login' className='space-y-4'>
+                <div className='flex justify-between items-center mb-4'>
+                  <h3 className='text-xl font-medium'>Acesso à Plataforma</h3>
+                  <TabsList>
+                    <TabsTrigger value='login'>Login</TabsTrigger>
+                    <TabsTrigger value='signup'>Primeiro acesso</TabsTrigger>
+                  </TabsList>
                 </div>
-                <div>
-                  <label className='text-sm font-medium text-muted-foreground block mb-1'>
-                    Senha
-                  </label>
-                  <div className='relative'>
-                    <Lock size={16} className='absolute left-3 top-3 text-muted-foreground' />
-                    <Input type='password' placeholder='Sua senha' className='pl-10' />
-                  </div>
-                </div>
-                <Button variant='default' className='w-full'>
-                  Entrar
-                </Button>
-                <div className='text-center'>
-                  <a
-                    href='#'
-                    className='text-sm text-primary hover:text-primary/90 flex items-center justify-center gap-1'
-                  >
-                    Primeiro acesso
-                    <ChevronRight size={16} />
-                  </a>
-                </div>
-              </div>
+                <TabsContent value='login'>
+                  <LoginForm />
+                </TabsContent>
+                <TabsContent value='signup'>
+                  <SignupForm />
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         </div>
