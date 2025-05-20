@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 
+from api.dependencies import get_current_user
 from api.schemas.user import Token, UserCreate, UserRead
 from core.database import get_session
 from core.security import create_access_token
@@ -36,6 +37,12 @@ async def signup(user: UserCreate, session: Annotated[Session, Depends(get_sessi
         password=user.password,
     )
     return db_user
+
+
+@router.get("/me", response_model=UserRead)
+async def get_me(current_user: Annotated[User, Depends(get_current_user)]) -> User:
+    """Retorna os dados do usuário autenticado"""
+    return current_user
 
 
 @router.post("/login", response_model=Token)
