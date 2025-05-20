@@ -7,6 +7,7 @@ requires-python = ">=3.10"
 dependencies = [
     "alembic>=1.15.2",
     "bcrypt>=4.3.0",
+    "celery[redis]>=5.5.2",
     "fastapi>=0.115.12",
     "passlib>=1.7.4",
     "psycopg2-binary>=2.9.10",
@@ -69,7 +70,7 @@ lint.ignore = [
 lint.fixable = ["ALL"]
 lint.unfixable = []
 
-lint.isort.known-first-party = ["olim"]
+lint.isort.known-first-party = ["back"]
 lint.isort.section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 lint.isort.combine-as-imports = true
 

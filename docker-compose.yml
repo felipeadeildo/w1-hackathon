@@ -31,12 +31,39 @@ services:
         condition: service_healthy
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/w1_holdings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     healthcheck:
       test: curl -f http://localhost:80/healthcheck || exit 1
       interval: 5s
       timeout: 5s
       retries: 3
       start_period: 2s
+
+  redis:
+    container_name: w1_redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    container_name: w1_worker
+    build: ./back
+    command: celery -A celery_app worker --loglevel=info
+    volumes:
+      - w1_hackathon:/app
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/w1_holdings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
 
 volumes:
   postgres_data:
