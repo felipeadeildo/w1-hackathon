@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import {
   Form,
@@ -10,7 +11,7 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
-import httpClient from '~/lib/httpClient'
+import { signup } from '~/lib/auth'
 import { signupSchema, type SignupInput } from '~/schemas/auth'
 
 export const SignupForm = () => {
@@ -20,13 +21,12 @@ export const SignupForm = () => {
   })
 
   const onSubmit = async (data: SignupInput) => {
-    const response = await httpClient.post<{ message: string }>('/users/signup', data, {
-      useAuth: false,
-    })
-    if (response.success) {
-      // TODO: show success message and redirect to login
-    } else {
-      form.setError('email', { message: response.detail })
+    try {
+      await signup(data)
+      toast.success('Conta criada com sucesso!')
+      // TODO: redirect to login
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao criar conta')
     }
   }
 

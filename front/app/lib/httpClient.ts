@@ -16,6 +16,7 @@ export interface ApiSuccessResponse<T> {
 export interface ApiErrorResponse {
   success: false
   detail: string
+  status?: number
 }
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse
@@ -59,9 +60,17 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
     const data = await response.json()
     if (!response.ok) {
+      if (response.status === 422) {
+        return {
+          success: false,
+          detail: 'Dados inválidos. Por favor, verifique as informações enviadas.',
+          status: response.status,
+        }
+      }
       return {
         success: false,
-        detail: data.detail || `Error: ${response.status}`,
+        detail: data.detail || `Erro inesperado (${response.status})`,
+        status: response.status,
       }
     }
 
@@ -82,7 +91,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     console.error('API request error:', error)
     return {
       success: false,
-      detail: error instanceof Error ? error.message : 'Unknown error occurred',
+      detail: error instanceof Error ? error.message : 'Erro de conexão com o servidor',
     }
   }
 }

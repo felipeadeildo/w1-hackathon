@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import {
   Form,
@@ -10,7 +11,7 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
-import httpClient, { AUTH_TOKEN_KEY } from '~/lib/httpClient'
+import { login } from '~/lib/auth'
 import { loginSchema, type LoginInput } from '~/schemas/auth'
 
 export const LoginForm = () => {
@@ -20,14 +21,12 @@ export const LoginForm = () => {
   })
 
   const onSubmit = async (data: LoginInput) => {
-    const response = await httpClient.post<{ token: string }>('/users/login', data, {
-      useAuth: false,
-    })
-    if (response.success) {
-      localStorage.setItem(AUTH_TOKEN_KEY, response.data.token)
+    try {
+      await login(data)
+      toast.success('Login realizado com sucesso!')
       // TODO: redirect after login
-    } else {
-      form.setError('email', { message: response.detail })
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao realizar login')
     }
   }
 
