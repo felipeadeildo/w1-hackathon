@@ -47,5 +47,10 @@ def read_root() -> dict:
     return {"message": "Bem-vindo ao sistema de gestão de holdings da W1"}
 
 
+@app.get("/healthcheck", tags=["healthcheck"])
+async def health_check() -> dict:
+    return {"status": "ok"}
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
