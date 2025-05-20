@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import users
+from api.routes import documents, holdings, users
 from core.config import settings
 from core.database import create_db_and_tables
 
@@ -33,13 +33,8 @@ app.add_middleware(
 
 # Incluir routers
 app.include_router(users.router, prefix="/api/users", tags=["users"])
-# app.include_router(assets.router, prefix="/api/assets", tags=["assets"])
-# app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
-# app.include_router(
-#     conversations.router, prefix="/api/conversations", tags=["conversations"]
-# )
-# app.include_router(simulations.router, prefix="/api/simulations", tags=["simulations"])
-# app.include_router(holdings.router, prefix="/api/holdings", tags=["holdings"])
+app.include_router(holdings.router, prefix="/api/holdings", tags=["holdings"])
+app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
 
 
 @app.get("/")

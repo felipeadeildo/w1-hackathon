@@ -1,4 +1,4 @@
-from pydantic import AnyHttpUrl, PostgresDsn
+from pydantic import AnyHttpUrl, PostgresDsn, RedisDsn
 from pydantic_settings import BaseSettings
 
 
@@ -11,6 +11,10 @@ class Settings(BaseSettings):
 
     # Banco de dados
     DATABASE_URL: PostgresDsn = "postgresql://postgres:postgres@localhost:5432/w1_holdings"  # type: ignore
+
+    # Celery/Redis
+    CELERY_BROKER_URL: RedisDsn = "redis://localhost:6379/0"  # type: ignore
+    CELERY_RESULT_BACKEND: RedisDsn = "redis://localhost:6379/0"  # type: ignore
 
     # JWT
     SECRET_KEY: str = "secretkey"
