@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlmodel import Session
 
 from api.schemas.user import Token, UserCreate, UserRead
 from core.database import get_session
@@ -17,10 +17,10 @@ router = APIRouter(
 
 
 @router.post("/signup", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-async def signup(user: UserCreate, session: Annotated[AsyncSession, Depends(get_session)]) -> User:
+async def signup(user: UserCreate, session: Annotated[Session, Depends(get_session)]) -> User:
     """Cria um novo usuário"""
     # Verifica se o email já existe
-    existing_user = await get_user_by_email(session, user.email)
+    existing_user = get_user_by_email(session, user.email)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -41,11 +41,11 @@ async def signup(user: UserCreate, session: Annotated[AsyncSession, Depends(get_
 @router.post("/login", response_model=Token)
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[Session, Depends(get_session)],
 ) -> Token:
     """Login do usuário"""
     # Autentica o usuário
-    user = await authenticate_user(session, form_data.username, form_data.password)
+    user = authenticate_user(session, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

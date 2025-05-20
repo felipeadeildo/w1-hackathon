@@ -37,4 +37,4 @@ class Message(TimeStampModel, UUIDModel, table=True):
 
     # Relacionamentos
     conversation: Conversation = Relationship(back_populates="messages")
-    sender: Optional["User"] = Relationship()
+    sender: Optional["User"] = Relationship(back_populates="messages_sent")

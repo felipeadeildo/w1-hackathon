@@ -8,11 +8,7 @@ from sqlmodel import Field, Relationship
 from models.base import TimeStampModel, UUIDModel
 
 if TYPE_CHECKING:
-    from models.asset import Asset
-    from models.conversation import Conversation
-    from models.document import Document
-    from models.holding import Holding
-    from models.simulation import Simulation
+    from models.conversation import Conversation, Message
 
 
 class User(TimeStampModel, UUIDModel, table=True):
@@ -27,21 +23,12 @@ class User(TimeStampModel, UUIDModel, table=True):
     profile: Optional["UserProfile"] = Relationship(back_populates="user")
     family_members: list["FamilyMember"] = Relationship(back_populates="user")
 
-    # Relacionamentos com outros modelos
-    assets: list["Asset"] = Relationship(
-        back_populates="owner", sa_relationship_kwargs={"lazy": "selectin"}
-    )
-    documents: list["Document"] = Relationship(
-        back_populates="user", sa_relationship_kwargs={"lazy": "selectin"}
-    )
     conversations: list["Conversation"] = Relationship(
         back_populates="user", sa_relationship_kwargs={"lazy": "selectin"}
     )
-    simulations: list["Simulation"] = Relationship(
-        back_populates="user", sa_relationship_kwargs={"lazy": "selectin"}
-    )
-    holdings: list["Holding"] = Relationship(
-        back_populates="client", sa_relationship_kwargs={"lazy": "selectin"}
+
+    messages_sent: list["Message"] = Relationship(
+        back_populates="sender", sa_relationship_kwargs={"lazy": "selectin"}
     )
 
 
