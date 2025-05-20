@@ -1,4 +1,24 @@
 services:
+  db:
+    container_name: postgres
+    image: postgres:16-alpine
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=w1_holdings
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 2s
+
   api:
     container_name: api
     build: ./back
@@ -6,6 +26,11 @@ services:
       - "${API_PORT}:80"
     volumes:
       - w1_hackathon:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/w1_holdings
     healthcheck:
       test: curl -f http://localhost:80/healthcheck || exit 1
       interval: 5s
@@ -14,4 +39,5 @@ services:
       start_period: 2s
 
 volumes:
+  postgres_data:
   w1_hackathon:

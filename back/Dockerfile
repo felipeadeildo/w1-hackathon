@@ -13,6 +13,8 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-RUN alembic upgrade head
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["uvicorn", "main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "80"]
