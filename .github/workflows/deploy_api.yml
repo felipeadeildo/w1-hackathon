@@ -21,7 +21,7 @@ jobs:
 
       - name: Stop and remove containers
         run: |
-          docker compose down
+          docker compose down --remove-orphans
           docker compose rm -f
         continue-on-error: true
 
@@ -32,7 +32,7 @@ jobs:
       - name: Run healthcheck
         run: |
           for i in $(seq 1 10); do
-            STATUS=$(docker inspect --format='{{.State.Health.Status}}' api)
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' w1_api)
             if [ "$STATUS" = "healthy" ]; then
               echo "API está saudável."
               exit 0
@@ -41,5 +41,5 @@ jobs:
             sleep 3
           done
           echo "❌ API container não ficou healthy." >&2
-          docker logs api >&2 || true
+          docker logs w1_api >&2 || true
           exit 1
