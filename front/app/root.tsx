@@ -1,5 +1,6 @@
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { Route } from './+types/root'
 import './app.css'
 import { Toaster } from './components/ui/sonner'
@@ -23,6 +24,14 @@ export const links: Route.LinksFunction = () => [
   },
 ]
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en'>
@@ -34,10 +43,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <AuthProvider>
-          {children}
-          <ScrollRestoration />
-          <Scripts />
-          <Toaster richColors />
+          <QueryClientProvider client={queryClient}>
+            {children}
+            <ScrollRestoration />
+            <Scripts />
+            <Toaster richColors />
+          </QueryClientProvider>
         </AuthProvider>
       </body>
     </html>
