@@ -1,10 +1,18 @@
 from collections.abc import Generator
 
+from sqlalchemy.pool import QueuePool
 from sqlmodel import Session, SQLModel, create_engine
 
 from core.config import settings
 
-engine = create_engine(str(settings.DATABASE_URL), echo=True, pool_pre_ping=True)
+engine = create_engine(
+    str(settings.DATABASE_URL),
+    echo=True,
+    pool_pre_ping=True,
+    poolclass=QueuePool,
+    pool_size=10,
+    max_overflow=20,
+)
 
 
 def create_db_and_tables() -> None:
