@@ -38,7 +38,7 @@ export const Header = () => {
         <Button
           variant='outline'
           className='flex items-center gap-1'
-          onClick={() => navigate('/app')}
+          onClick={() => navigate('/auth')}
         >
           <User size={16} />
           <span>Área do Cliente</span>

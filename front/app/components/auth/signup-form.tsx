@@ -19,14 +19,14 @@ export const SignupForm = () => {
   const navigate = useNavigate()
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { email: '', password: '', passwordConfirm: '' },
+    defaultValues: { email: '', password: '', passwordConfirm: '', name: '' },
   })
 
   const onSubmit = async (data: SignupInput) => {
     try {
       await signup(data)
       toast.success('Conta criada com sucesso!')
-      navigate('/login')
+      setTimeout(() => navigate('/app'), 1000)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao criar conta')
     }
@@ -35,6 +35,19 @@ export const SignupForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <FormField
+          name='name'
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome completo</FormLabel>
+              <FormControl>
+                <Input placeholder='Seu nome completo' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           name='email'
           control={form.control}

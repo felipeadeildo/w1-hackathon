@@ -7,17 +7,14 @@ interface LoginCredentials {
 }
 
 interface AuthToken {
-  token: string
+  access_token: string
 }
 
 interface SignupCredentials {
   email: string
   password: string
   passwordConfirm: string
-}
-
-interface SignupResponse {
-  message: string
+  name: string
 }
 
 export const login = async (credentials: LoginCredentials): Promise<AuthToken> => {
@@ -33,24 +30,28 @@ export const login = async (credentials: LoginCredentials): Promise<AuthToken> =
     throw new Error(response.detail)
   }
 
-  localStorage.setItem(AUTH_TOKEN_KEY, response.data.token)
-
+  localStorage.setItem(AUTH_TOKEN_KEY, response.data.access_token)
   return response.data
 }
 
-export const signup = async (credentials: SignupCredentials): Promise<SignupResponse> => {
-  const formData = new FormData()
-  formData.append('username', credentials.email)
-  formData.append('password', credentials.password)
-
-  const response = await httpClient.post<SignupResponse>('/users/signup', formData, {
-    useAuth: false,
-  })
+export const signup = async (credentials: SignupCredentials): Promise<AuthToken> => {
+  const response = await httpClient.post<AuthToken>(
+    '/users/signup',
+    {
+      email: credentials.email,
+      password: credentials.password,
+      name: credentials.name,
+    },
+    {
+      useAuth: false,
+    },
+  )
 
   if (!response.success) {
     throw new Error(response.detail)
   }
 
+  localStorage.setItem(AUTH_TOKEN_KEY, response.data.access_token)
   return response.data
 }
 

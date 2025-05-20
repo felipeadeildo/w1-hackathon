@@ -30,9 +30,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentUser)
       } catch (error) {
         console.error('Failed to load user:', error)
-        if (error instanceof Error) {
-          toast.error(error.message)
-        }
+        // if (error instanceof Error) {
+        //   toast.error(error.message)
+        // }
         auth.logout()
       } finally {
         setIsLoading(false)

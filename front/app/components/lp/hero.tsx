@@ -74,7 +74,7 @@ export const Hero = () => {
                     Acesse sua conta para gerenciar seu patrimônio
                   </p>
                 </div>
-                <Button size='lg' onClick={() => navigate('/app')} className='w-full'>
+                <Button size='lg' onClick={() => navigate('/auth')} className='w-full'>
                   Acessar Plataforma
                 </Button>
               </div>

@@ -28,7 +28,8 @@ export const LoginForm = () => {
     try {
       const success = await login(data.email, data.password)
       if (success) {
-        navigate('/app')
+        toast.success('Login realizado com sucesso!')
+        setTimeout(() => navigate('/app'), 1000)
       } else {
         toast.error('Credenciais inválidas')
       }
