@@ -13,7 +13,7 @@ class DocumentRequirementOut(BaseModel):
     status: str | None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class DocumentUpload(BaseModel):
@@ -36,4 +36,4 @@ class DocumentOut(BaseModel):
     validated_at: datetime | None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

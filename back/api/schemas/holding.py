@@ -19,7 +19,7 @@ class HoldingOut(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class HoldingStageOut(BaseModel):
@@ -33,4 +33,4 @@ class HoldingStageOut(BaseModel):
     end_date: datetime | None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
