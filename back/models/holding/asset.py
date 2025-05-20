@@ -53,7 +53,7 @@ class Asset(TimeStampModel, UUIDModel, table=True):
     # Relacionamentos
     owner: "User" = Relationship(back_populates="assets")
     holding_assets: list["HoldingAsset"] = Relationship(back_populates="asset")
-    identified_in_chat: "ChatSession | None" = Relationship()
+    identified_in_chat: "ChatSession" = Relationship(back_populates="assets")
 
 
 class HoldingAsset(TimeStampModel, UUIDModel, table=True):
@@ -72,4 +72,4 @@ class HoldingAsset(TimeStampModel, UUIDModel, table=True):
 
     # Relacionamentos
     holding: "Holding" = Relationship(back_populates="holding_assets")
-    asset: Asset = Relationship(back_populates="holding_assets")
+    asset: "Asset" = Relationship(back_populates="holding_assets")

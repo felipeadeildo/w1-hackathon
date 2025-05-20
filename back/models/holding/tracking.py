@@ -33,7 +33,7 @@ class HoldingActivity(TimeStampModel, UUIDModel, table=True):
 
     # Relacionamentos
     holding: "Holding" = Relationship(back_populates="activities")
-    performed_by: "User | None" = Relationship()
-    related_stage: "HoldingStage | None" = Relationship()
-    related_document: "Document | None" = Relationship()
-    related_chat: "ChatSession | None" = Relationship()
+    performed_by: "User" = Relationship()
+    related_stage: "HoldingStage" = Relationship()
+    related_document: "Document" = Relationship()
+    related_chat: "ChatSession" = Relationship()

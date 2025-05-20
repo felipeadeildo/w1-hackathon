@@ -8,6 +8,7 @@ from sqlmodel import Field, Relationship
 from models.base import TimeStampModel, UUIDModel
 
 if TYPE_CHECKING:
+    from models.holding.asset import Asset
     from models.holding.core import HoldingStage
     from models.holding.document import DocumentRequirement
 
@@ -28,6 +29,7 @@ class ChatSession(TimeStampModel, UUIDModel, table=True):
     document_generations: list["ChatDocumentGeneration"] = Relationship(
         back_populates="chat_session"
     )
+    assets: list["Asset"] = Relationship(back_populates="identified_in_chat")
 
 
 class ChatMessage(TimeStampModel, UUIDModel, table=True):

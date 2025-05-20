@@ -52,5 +52,5 @@ class TaxSavingDetail(TimeStampModel, UUIDModel, table=True):
 
     # Relacionamentos
     simulation: SimulationResult = Relationship(back_populates="tax_details")
-    applies_to_asset: "Asset | None" = Relationship()
-    applies_to_family_member: "FamilyMember | None" = Relationship()
+    applies_to_asset: "Asset" = Relationship()
+    applies_to_family_member: "FamilyMember" = Relationship()

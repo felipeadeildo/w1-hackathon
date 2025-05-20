@@ -26,7 +26,7 @@ class User(TimeStampModel, UUIDModel, table=True):
     is_admin: bool = False
 
     # Relacionamentos básicos
-    profile: "UserProfile | None" = Relationship(back_populates="user")
+    profile: "UserProfile" = Relationship(back_populates="user")
     family_members: list["FamilyMember"] = Relationship(back_populates="user")
     conversations: list["Conversation"] = Relationship(
         back_populates="user", sa_relationship_kwargs={"lazy": "selectin"}

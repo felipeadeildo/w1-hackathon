@@ -35,11 +35,11 @@ class DocumentRequirement(TimeStampModel, UUIDModel, table=True):
 
     # Relacionamentos
     holding: "Holding" = Relationship(back_populates="document_requirements")
-    stage: "HoldingStage | None" = Relationship(back_populates="document_requirements")
-    created_by: "User | None" = Relationship(
+    stage: "HoldingStage" = Relationship(back_populates="document_requirements")
+    created_by: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[DocumentRequirement.created_by_user_id]"}
     )
-    generated_from_chat: "ChatDocumentGeneration | None" = Relationship()
+    generated_from_chat: "ChatDocumentGeneration" = Relationship()
     documents: list["Document"] = Relationship(back_populates="requirement")
 
 
@@ -72,7 +72,7 @@ class Document(TimeStampModel, UUIDModel, table=True):
     uploaded_by: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Document.uploaded_by_id]"}
     )
-    validated_by: "User | None" = Relationship(
+    validated_by: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Document.validated_by_user_id]"}
     )
     extracted_data: list["DocumentExtractedData"] = Relationship(back_populates="document")
@@ -95,7 +95,7 @@ class DocumentExtractedData(TimeStampModel, UUIDModel, table=True):
 
     # Relacionamentos
     document: Document = Relationship(back_populates="extracted_data")
-    verified_by: "User | None" = Relationship(
+    verified_by: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[DocumentExtractedData.verified_by_user_id]"}
     )
 
