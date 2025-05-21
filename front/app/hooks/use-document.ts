@@ -1,9 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  getDocument,
-  getRequirementDocuments,
-  uploadDocument,
-} from '~/lib/document'
+import { getDocument, getRequirementDocuments, uploadDocument } from '~/lib/document'
 
 export function useRequirementDocuments(holdingId: string, requirementId: string) {
   return useQuery({
@@ -24,9 +20,8 @@ export function useDocument(documentId: string) {
 export function useUploadDocument() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (
-      params: { holdingId: string; requirementId: string; file: File }
-    ) => uploadDocument(params.holdingId, params.requirementId, params.file),
+    mutationFn: (params: { holdingId: string; requirementId: string; file: File }) =>
+      uploadDocument(params.holdingId, params.requirementId, params.file),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['requirementDocuments', variables.holdingId, variables.requirementId],

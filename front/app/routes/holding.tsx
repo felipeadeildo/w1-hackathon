@@ -14,12 +14,15 @@ export default function HoldingPage() {
     <div className='space-y-6'>
       <h2 className='text-2xl font-bold'>{holding.name}</h2>
       <div className='space-y-2'>
-        <div>Status: <span className='font-mono'>{holding.status}</span></div>
+        <div>
+          Status: <span className='font-mono'>{holding.status}</span>
+        </div>
         <div>Fases:</div>
         <ul className='list-disc ml-6'>
           {stages?.map((stage) => (
             <li key={stage.id}>
-              {stage.order}. {stage.description} <span className='text-xs text-muted-foreground'>({stage.status})</span>
+              {stage.order}. {stage.description}{' '}
+              <span className='text-xs text-muted-foreground'>({stage.status})</span>
             </li>
           ))}
         </ul>

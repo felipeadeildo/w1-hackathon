@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  createHolding,
   getHolding,
   getHoldings,
   getHoldingStages,
@@ -34,5 +35,15 @@ export function useStageRequirements(holdingId: string, stageId: string) {
     queryKey: ['stageRequirements', holdingId, stageId],
     queryFn: () => getStageRequirements(holdingId, stageId),
     enabled: !!holdingId && !!stageId,
+  })
+}
+
+export function useCreateHolding() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: createHolding,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['holdings'] })
+    },
   })
 }

@@ -1,4 +1,9 @@
-import type { DocumentRequirement, Holding, HoldingStage } from '~/types/holding'
+import type {
+  CreateHoldingInput,
+  DocumentRequirement,
+  Holding,
+  HoldingStage,
+} from '~/types/holding'
 import { httpClient } from './httpClient'
 
 export const getHoldings = async (): Promise<Holding[]> => {
@@ -27,9 +32,19 @@ export const getHoldingStages = async (holdingId: string): Promise<HoldingStage[
 
 export const getStageRequirements = async (
   holdingId: string,
-  stageId: string
+  stageId: string,
 ): Promise<DocumentRequirement[]> => {
-  const res = await httpClient.get<DocumentRequirement[]>(`/holdings/${holdingId}/stages/${stageId}/requirements`)
+  const res = await httpClient.get<DocumentRequirement[]>(
+    `/holdings/${holdingId}/stages/${stageId}/requirements`,
+  )
+  if (!res.success) {
+    throw new Error(res.detail)
+  }
+  return res.data
+}
+
+export const createHolding = async (input: CreateHoldingInput): Promise<Holding> => {
+  const res = await httpClient.post<Holding>('/holdings', { ...input })
   if (!res.success) {
     throw new Error(res.detail)
   }

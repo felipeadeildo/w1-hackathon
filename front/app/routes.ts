@@ -3,8 +3,11 @@ import { type RouteConfig, index, layout, prefix, route } from '@react-router/de
 export default [
   index('routes/lp.tsx'),
   route('auth', 'routes/auth.tsx'),
-  layout('layouts/protected.tsx', prefix('app', [
-    index('routes/dashboard.tsx'),
-    route('holding/:holdingId', 'routes/holding.tsx'),
-  ])),
+  layout(
+    'layouts/protected.tsx',
+    prefix('app', [
+      index('routes/dashboard.tsx'),
+      route('holding/:holdingId', 'routes/holding.tsx'),
+    ]),
+  ),
 ] satisfies RouteConfig

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { Button } from '~/components/ui/button'
 import {
@@ -8,15 +9,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/ui/dialog'
+import { Form } from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
 import { Loading } from '~/components/ui/loading'
 import { useAuth } from '~/hooks/use-auth'
-import { useHoldings } from '~/hooks/use-holding'
+import { useCreateHolding, useHoldings } from '~/hooks/use-holding'
 
 export default function DashboardPage() {
   const { user } = useAuth()
   const { data: holdings, isLoading } = useHoldings()
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
+  const createHoldingMutation = useCreateHolding()
+  const form = useForm<{ name: string }>()
 
   if (isLoading)
     return (
@@ -37,33 +43,31 @@ export default function DashboardPage() {
             <DialogHeader>
               <DialogTitle>Criar Holding</DialogTitle>
             </DialogHeader>
-            <form
-              className='flex flex-col gap-4'
-              onSubmit={async (e) => {
-                e.preventDefault()
-                const form = e.target as HTMLFormElement
-                const name = (form.elements.namedItem('name') as HTMLInputElement).value
-                const res = await fetch('/api/holdings/', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ name }),
-                  credentials: 'include',
-                })
-                if (res.ok) {
-                  const holding = await res.json()
-                  setOpen(false)
-                  navigate(`/app/holding/${holding.id}`)
-                }
-              }}
-            >
-              <input
-                name='name'
-                placeholder='Nome da holding'
-                className='input input-bordered w-full'
-                required
-              />
-              <Button type='submit'>Criar</Button>
-            </form>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(async (data) => {
+                  try {
+                    const holding = await createHoldingMutation.mutateAsync({ name: data.name })
+                    setOpen(false)
+                    navigate(`/app/holding/${holding.id}`)
+                  } catch {
+                    // handle error (show toast, etc)
+                  }
+                })}
+                className='flex flex-col gap-4'
+              >
+                <Label htmlFor='name'>Nome da holding</Label>
+                <Input
+                  id='name'
+                  {...form.register('name', { required: true })}
+                  placeholder='Nome da holding'
+                  required
+                />
+                <Button type='submit' disabled={createHoldingMutation.isPending}>
+                  {createHoldingMutation.isPending ? 'Criando...' : 'Criar'}
+                </Button>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
       </div>
