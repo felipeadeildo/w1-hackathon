@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -26,7 +26,7 @@ export default function DashboardPage() {
 
   if (isLoading)
     return (
-      <div className='flex items-center justify-center'>
+      <div className='flex items-center justify-center h-screen'>
         <Loading label='Carregando holdings...' />
       </div>
     )
@@ -81,8 +81,8 @@ export default function DashboardPage() {
       <ul className='space-y-2'>
         {holdings.map((h) => (
           <li key={h.id}>
-            <Button variant='outline' onClick={() => navigate(`/app/holding/${h.id}`)}>
-              {h.name}
+            <Button variant='outline'>
+              <Link to={`/app/holding/${h.id}`}>{h.name}</Link>
             </Button>
           </li>
         ))}
