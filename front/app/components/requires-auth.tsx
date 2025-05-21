@@ -20,7 +20,7 @@ export function RequiresAuth({ children }: RequireAuthProps) {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast.error('Sua sessão expirou ou você não está autenticado. Faça login novamente.')
-      navigate('/login', {
+      navigate('/auth', {
         replace: true,
         state: { from: location.pathname },
       })
