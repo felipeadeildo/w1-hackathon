@@ -61,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await auth.login({ email, password })
       const user = await auth.getCurrentUser()
       setUser(user)
+      toast.success('Login realizado com sucesso!')
       return true
     } catch (error) {
       console.error('Login failed:', error)
@@ -79,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await auth.signup(data)
       const user = await auth.getCurrentUser()
       setUser(user)
+      toast.success('Conta criada com sucesso!')
       return true
     } catch (error) {
       console.error('Signup failed:', error)
