@@ -25,9 +25,14 @@ jobs:
           docker compose rm -f
         continue-on-error: true
 
+      - name: Prune unused volumes
+        run: |
+          docker volume prune -f
+        continue-on-error: true
+
       - name: Build and start containers
         run: |
-          docker compose up -d --build
+          docker compose up -d --build --force-recreate --remove-orphans --no-deps
 
       - name: Run healthcheck
         run: |
@@ -38,7 +43,7 @@ jobs:
               exit 0
             fi
             echo "Aguardando healthcheck… ($i/10)"
-            sleep 3
+            sleep 2
           done
           echo "❌ API container não ficou healthy." >&2
           docker logs w1_api >&2 || true
