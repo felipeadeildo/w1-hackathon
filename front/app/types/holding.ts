@@ -27,3 +27,8 @@ export interface DocumentRequirement {
   is_required: boolean
   status?: string
 }
+
+export interface CreateHoldingInput {
+  name: string
+  consultant_id?: string | null
+}
