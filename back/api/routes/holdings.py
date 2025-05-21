@@ -1,16 +1,16 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from api.dependencies import get_current_user
-from api.schemas.document import DocumentRequirementOut
+from api.schemas.document import DocumentOut, DocumentRequirementOut
 from api.schemas.holding import HoldingCreate, HoldingOut, HoldingStageOut
 from core.database import get_session
 from core.holding.holding_service import create_holding
-from models.holding.core import HoldingStage
-from models.holding.document import DocumentRequirement
+from models.holding.core import Holding, HoldingStage
+from models.holding.document import Document, DocumentRequirement
 from models.user import User
 
 router = APIRouter(tags=["holdings"])
@@ -28,6 +28,27 @@ def create_holding_route(
         client_id=current_user.id,
         consultant_id=holding_in.consultant_id,
     )
+    return HoldingOut.model_validate(holding)
+
+
+@router.get("/", response_model=list[HoldingOut])
+def list_holdings(
+    session: Annotated[Session, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> list[HoldingOut]:
+    holdings = list(session.exec(select(Holding).where(Holding.client_id == current_user.id)))
+    return [HoldingOut.model_validate(h) for h in holdings]
+
+
+@router.get("/{holding_id}", response_model=HoldingOut)
+def get_holding(
+    holding_id: str,
+    session: Annotated[Session, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> HoldingOut:
+    holding = session.get(Holding, UUID(holding_id))
+    if not holding or holding.client_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Holding not found")
     return HoldingOut.model_validate(holding)
 
 
@@ -62,3 +83,26 @@ def list_stage_requirements(
         )
     )
     return [DocumentRequirementOut.model_validate(r) for r in reqs]
+
+
+@router.get(
+    "/{holding_id}/requirements/{requirement_id}/documents",
+    response_model=list[DocumentOut],
+)
+def list_requirement_documents(
+    holding_id: str,
+    requirement_id: str,
+    session: Annotated[Session, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> list[DocumentOut]:
+    from uuid import UUID
+
+    docs = list(
+        session.exec(
+            select(Document).where(
+                (Document.holding_id == UUID(holding_id))
+                & (Document.requirement_id == UUID(requirement_id))
+            )
+        )
+    )
+    return [DocumentOut.model_validate(d) for d in docs]
