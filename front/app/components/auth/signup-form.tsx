@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { UserPlus } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
-import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import {
   Form,
@@ -12,24 +11,19 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
-import { signup } from '~/lib/auth'
+import { Loading } from '~/components/ui/loading'
+import { useAuth } from '~/hooks/use-auth'
 import { signupSchema, type SignupInput } from '~/schemas/auth'
 
 export const SignupForm = () => {
-  const navigate = useNavigate()
+  const { signup, isLoading } = useAuth()
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: { email: '', password: '', passwordConfirm: '', name: '' },
   })
 
   const onSubmit = async (data: SignupInput) => {
-    try {
-      await signup(data)
-      toast.success('Conta criada com sucesso!')
-      setTimeout(() => navigate('/app'), 1000)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao criar conta')
-    }
+    await signup(data)
   }
 
   return (
@@ -87,8 +81,14 @@ export const SignupForm = () => {
             </FormItem>
           )}
         />
-        <Button type='submit' className='w-full'>
-          Criar Conta
+        <Button type='submit' className='w-full' disabled={!form.formState.isValid || isLoading}>
+          {isLoading && <Loading label='Criando conta...' labelPosition='right' size={20} />}
+          {!isLoading && (
+            <>
+              <UserPlus className='mr-2 h-4 w-4' />
+              Criar Conta
+            </>
+          )}
         </Button>
       </form>
     </Form>

@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
+import { toast } from 'sonner'
 import { Loading } from '~/components/ui/loading'
 import { useAuth } from '~/hooks/use-auth'
 
@@ -18,6 +19,7 @@ export function RequiresAuth({ children }: RequireAuthProps) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
+      toast.error('Sua sessão expirou ou você não está autenticado. Faça login novamente.')
       navigate('/login', {
         replace: true,
         state: { from: location.pathname },

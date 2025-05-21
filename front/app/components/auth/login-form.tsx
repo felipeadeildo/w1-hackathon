@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { LogIn } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
-import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import {
   Form,
@@ -12,30 +11,19 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
+import { Loading } from '~/components/ui/loading'
 import { useAuth } from '~/hooks/use-auth'
 import { loginSchema, type LoginInput } from '~/schemas/auth'
 
 export const LoginForm = () => {
-  const { login } = useAuth()
-  const navigate = useNavigate()
-
+  const { login, isLoading } = useAuth()
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   })
 
   const onSubmit = async (data: LoginInput) => {
-    try {
-      const success = await login(data.email, data.password)
-      if (success) {
-        toast.success('Login realizado com sucesso!')
-        setTimeout(() => navigate('/app'), 1000)
-      } else {
-        toast.error('Credenciais inválidas')
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao realizar login')
-    }
+    await login(data.email, data.password)
   }
 
   return (
@@ -67,8 +55,14 @@ export const LoginForm = () => {
             </FormItem>
           )}
         />
-        <Button type='submit' className='w-full'>
-          Entrar
+        <Button type='submit' className='w-full' disabled={!form.formState.isValid || isLoading}>
+          {isLoading && <Loading label='Entrando...' labelPosition='right' size={20} />}
+          {!isLoading && (
+            <>
+              <LogIn className='mr-2 h-4 w-4' />
+              Entrar
+            </>
+          )}
         </Button>
       </form>
     </Form>
