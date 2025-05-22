@@ -243,7 +243,12 @@ function Sidebar({
   )
 }
 
-function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<typeof Button>) {
+function SidebarTrigger({ 
+  className, 
+  onClick, 
+  floating = true,
+  ...props 
+}: React.ComponentProps<typeof Button> & { floating?: boolean }) {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -252,7 +257,11 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       data-slot='sidebar-trigger'
       variant='ghost'
       size='icon'
-      className={cn('size-7', className)}
+      className={cn(
+        'size-8',
+        floating && 'absolute -right-2 top-4 z-30 translate-x-1/2 bg-background shadow-sm border hover:bg-primary/10 transition-all duration-200',
+        className
+      )}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
@@ -688,5 +697,6 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-  useSidebar,
+  useSidebar
 }
+
