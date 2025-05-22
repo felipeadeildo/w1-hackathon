@@ -1,4 +1,4 @@
-"""Document management models."""
+"""Document management models for onboarding."""
 
 import uuid
 from datetime import datetime
@@ -9,16 +9,14 @@ from sqlmodel import Field, Relationship
 from models.base import TimeStampModel, UUIDModel
 
 if TYPE_CHECKING:
-    from models.holding.chat import ChatDocumentGeneration
-    from models.holding.core import Holding, HoldingStage
+    from models.onboarding import OnboardingStep, UserOnboardingStep
     from models.user import User
 
 
 class DocumentRequirement(TimeStampModel, UUIDModel, table=True):
-    """Requisitos de documentos a serem enviados."""
+    """Requirements for documents to be submitted during onboarding."""
 
-    holding_id: uuid.UUID = Field(foreign_key="holding.id")
-    stage_id: uuid.UUID | None = Field(default=None, foreign_key="holdingstage.id")
+    step_id: int = Field(foreign_key="onboardingstep.id")
     name: str
     description: str
     doc_type: str  # 'rg', 'cpf', 'property_deed', etc.
@@ -28,25 +26,18 @@ class DocumentRequirement(TimeStampModel, UUIDModel, table=True):
     priority: int = Field(default=0)
     reason: str | None = None
 
-    # Campos específicos para documentos gerados pelo chat LLM
-    generated_from_chat_id: uuid.UUID | None = Field(
-        default=None, foreign_key="chatdocumentgeneration.id"
-    )
-
-    # Relacionamentos
-    holding: "Holding" = Relationship(back_populates="document_requirements")
-    stage: "HoldingStage" = Relationship(back_populates="document_requirements")
+    # Relationships
+    step: "OnboardingStep" = Relationship(back_populates="document_requirements")
     created_by: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[DocumentRequirement.created_by_user_id]"}
     )
-    generated_from_chat: "ChatDocumentGeneration" = Relationship()
     documents: list["Document"] = Relationship(back_populates="requirement")
 
 
 class Document(TimeStampModel, UUIDModel, table=True):
-    """Documentos enviados pelos usuários."""
+    """Documents uploaded by users during onboarding."""
 
-    holding_id: uuid.UUID = Field(foreign_key="holding.id")
+    user_step_id: int = Field(foreign_key="useronboardingstep.id")
     requirement_id: uuid.UUID = Field(foreign_key="documentrequirement.id")
     file_path: str
     original_filename: str
@@ -55,19 +46,19 @@ class Document(TimeStampModel, UUIDModel, table=True):
     content_type: str  # MIME type
     uploaded_by_id: uuid.UUID = Field(foreign_key="user.id")
 
-    # Status e validação
+    # Status and validation
     status: str = Field(default="uploaded")  # 'uploaded', 'processing', 'validated', 'rejected'
     rejection_reason: str | None = None
     validated_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
     validated_at: datetime | None = None
 
-    # Campos para processamento OCR
+    # OCR processing fields
     ocr_processed: bool = Field(default=False)
     ocr_confidence: float | None = None
     ocr_processed_at: datetime | None = None
 
-    # Relacionamentos
-    holding: "Holding" = Relationship(back_populates="documents")
+    # Relationships
+    user_step: "UserOnboardingStep" = Relationship(back_populates="documents")
     requirement: DocumentRequirement = Relationship(back_populates="documents")
     uploaded_by: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Document.uploaded_by_id]"}
@@ -80,7 +71,7 @@ class Document(TimeStampModel, UUIDModel, table=True):
 
 
 class DocumentExtractedData(TimeStampModel, UUIDModel, table=True):
-    """Dados extraídos de documentos via OCR e processamento."""
+    """Data extracted from documents via OCR and processing."""
 
     document_id: uuid.UUID = Field(foreign_key="document.id")
     field_name: str
@@ -88,12 +79,12 @@ class DocumentExtractedData(TimeStampModel, UUIDModel, table=True):
     confidence: float
     extraction_method: str  # 'ocr', 'llm', 'manual'
 
-    # Verificação manual
+    # Manual verification
     verified: bool = Field(default=False)
     verified_by_user_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
     verified_at: datetime | None = None
 
-    # Relacionamentos
+    # Relationships
     document: Document = Relationship(back_populates="extracted_data")
     verified_by: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[DocumentExtractedData.verified_by_user_id]"}
@@ -101,7 +92,7 @@ class DocumentExtractedData(TimeStampModel, UUIDModel, table=True):
 
 
 class DocumentReview(TimeStampModel, UUIDModel, table=True):
-    """Revisões de documentos por consultores/administradores."""
+    """Document reviews by consultants/administrators."""
 
     document_id: uuid.UUID = Field(foreign_key="document.id")
     reviewer_id: uuid.UUID = Field(foreign_key="user.id")
@@ -109,6 +100,6 @@ class DocumentReview(TimeStampModel, UUIDModel, table=True):
     comments: str | None = None
     correction_requested: str | None = None
 
-    # Relacionamentos
+    # Relationships
     document: Document = Relationship(back_populates="reviews")
     reviewer: "User" = Relationship()

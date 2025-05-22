@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import sqlalchemy
 from sqlmodel import Field, Relationship
@@ -11,9 +11,6 @@ from models.base import TimeStampModel, UUIDModel
 
 if TYPE_CHECKING:
     from models.conversation import Conversation, Message
-    from models.holding.asset import Asset
-    from models.holding.chat import ChatSession
-    from models.holding.core import Holding
     from models.onboarding import UserOnboardingFlow
 
 
@@ -35,16 +32,6 @@ class User(TimeStampModel, UUIDModel, table=True):
     messages_sent: list["Message"] = Relationship(
         back_populates="sender", sa_relationship_kwargs={"lazy": "selectin"}
     )
-
-    # Relacionamentos com holdings
-    holdings_as_client: list["Holding"] = Relationship(
-        back_populates="client",
-        sa_relationship_kwargs={"foreign_keys": "[Holding.client_id]", "lazy": "selectin"},
-    )
-    holdings_as_consultant: list["Holding"] = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[Holding.consultant_id]", "lazy": "selectin"}
-    )
-    assets: list["Asset"] = Relationship(back_populates="owner")
 
     # Relacionamento com onboarding
     onboarding_flows: list["UserOnboardingFlow"] = Relationship(back_populates="user")
@@ -86,8 +73,6 @@ class FamilyMember(TimeStampModel, UUIDModel, table=True):
 
     # Campos para controle
     identified_by: str = Field(default="llm")  # 'llm', 'consultant', 'client'
-    identified_in_chat_id: uuid.UUID | None = Field(default=None, foreign_key="chatsession.id")
 
     # Relacionamentos
     user: User = Relationship(back_populates="family_members")
-    identified_in_chat: Optional["ChatSession"] = Relationship()
