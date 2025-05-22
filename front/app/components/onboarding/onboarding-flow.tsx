@@ -20,20 +20,47 @@ interface OnboardingFlowProps {
 export function OnboardingFlow({ flow }: OnboardingFlowProps) {
   const { data: activeStep } = useCurrentActiveStep()
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
+  const [manualNavigation, setManualNavigation] = useState<boolean>(false)
 
-  // Find the active step index when data loads
+  // Sort steps by order for display
+  const sortedSteps = [...flow.user_steps].sort((a, b) => a.step.order - b.step.order)
+
+  // Find the active step index when data loads, but only if no manual navigation has happened
   useEffect(() => {
-    if (activeStep) {
-      const index = flow.user_steps.findIndex((step) => step.id === activeStep.id)
+    if (activeStep && !manualNavigation) {
+      const index = sortedSteps.findIndex((step) => step.id === activeStep.id)
       if (index >= 0) {
         setCurrentStepIndex(index)
       }
     }
-  }, [activeStep, flow.user_steps])
+  }, [activeStep, sortedSteps, manualNavigation])
 
-  // Sort steps by order for display
-  const sortedSteps = [...flow.user_steps].sort((a, b) => a.step.order - b.step.order)
+  // Find the first incomplete step
+  useEffect(() => {
+    if (!manualNavigation) {
+      const firstIncompleteIndex = sortedSteps.findIndex((step) => !step.is_completed)
+      if (firstIncompleteIndex >= 0) {
+        setCurrentStepIndex(firstIncompleteIndex)
+      }
+    }
+  }, [sortedSteps, manualNavigation])
+
   const currentUserStep = sortedSteps[currentStepIndex]
+
+  // Handle step completion
+  const handleStepComplete = () => {
+    const nextIndex = currentStepIndex + 1
+    if (nextIndex < sortedSteps.length) {
+      setManualNavigation(true)
+      setCurrentStepIndex(nextIndex)
+    }
+  }
+
+  // Handle manual step selection
+  const handleStepSelect = (index: number) => {
+    setManualNavigation(true)
+    setCurrentStepIndex(index)
+  }
 
   return (
     <div className='mx-auto max-w-full'>
@@ -45,7 +72,7 @@ export function OnboardingFlow({ flow }: OnboardingFlowProps) {
         <CardContent>
           <Stepper
             value={currentStepIndex}
-            onValueChange={setCurrentStepIndex}
+            onValueChange={handleStepSelect}
             className='w-full'
             orientation='horizontal'
           >
@@ -82,15 +109,7 @@ export function OnboardingFlow({ flow }: OnboardingFlowProps) {
             <p className='text-muted-foreground'>{currentUserStep.step.description}</p>
           </CardHeader>
           <CardContent>
-            <OnboardingStepFactory
-              userStep={currentUserStep}
-              onComplete={() => {
-                const nextIndex = currentStepIndex + 1
-                if (nextIndex < sortedSteps.length) {
-                  setCurrentStepIndex(nextIndex)
-                }
-              }}
-            />
+            <OnboardingStepFactory userStep={currentUserStep} onComplete={handleStepComplete} />
           </CardContent>
         </Card>
       )}
