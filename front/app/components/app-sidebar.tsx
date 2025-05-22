@@ -101,7 +101,10 @@ export function AppSidebar() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <SidebarMenuButton asChild>
-                            <a href={holding.url} className='flex items-center justify-center w-full'>
+                            <a
+                              href={holding.url}
+                              className='flex items-center justify-center w-full'
+                            >
                               <Building2 className='h-4 w-4' />
                             </a>
                           </SidebarMenuButton>

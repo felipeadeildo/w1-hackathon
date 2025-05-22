@@ -1,4 +1,4 @@
-import type { StepDataObject, UserOnboardingStep } from "~/types/onboarding"
+import type { StepDataObject, UserOnboardingStep } from '~/types/onboarding'
 
 interface DataStepProps {
   userStep: UserOnboardingStep
