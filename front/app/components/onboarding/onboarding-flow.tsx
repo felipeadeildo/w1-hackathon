@@ -36,17 +36,18 @@ export function OnboardingFlow({ flow }: OnboardingFlowProps) {
   const currentUserStep = sortedSteps[currentStepIndex]
 
   return (
-    <div className='mx-auto max-w-5xl px-4 py-8'>
-      <Card className='mb-8'>
-        <CardHeader>
+    <div className='mx-auto max-w-full'>
+      <Card className='mb-6'>
+        <CardHeader className='pb-2'>
           <CardTitle className='text-center text-2xl'>{flow.flow.name}</CardTitle>
-          <p className='text-center text-muted-foreground'>{flow.flow.description}</p>
+          <p className='text-center text-sm text-muted-foreground'>{flow.flow.description}</p>
         </CardHeader>
         <CardContent>
           <Stepper
             value={currentStepIndex}
             onValueChange={setCurrentStepIndex}
-            className='w-full justify-center'
+            className='w-full'
+            orientation='horizontal'
           >
             {sortedSteps.map((userStep, index) => (
               <StepperItem
@@ -54,20 +55,20 @@ export function OnboardingFlow({ flow }: OnboardingFlowProps) {
                 step={index}
                 completed={userStep.is_completed}
                 disabled={index > 0 && !sortedSteps[index - 1].is_completed}
-                className='relative flex-1 flex-col'
+                className='not-last:flex-1'
               >
-                <StepperTrigger className='flex-col gap-3 rounded'>
-                  <StepperIndicator />
-                  <div className='space-y-0.5 px-2'>
-                    <StepperTitle>{userStep.step.name}</StepperTitle>
-                    <StepperDescription className='max-sm:hidden line-clamp-2'>
+                <StepperTrigger className='rounded flex flex-col md:flex-row md:items-center gap-2'>
+                  <StepperIndicator className='shrink-0' />
+                  <div className='text-center md:text-left'>
+                    <StepperTitle className='text-sm whitespace-nowrap'>
+                      {userStep.step.name}
+                    </StepperTitle>
+                    <StepperDescription className='max-sm:hidden line-clamp-1 text-xs'>
                       {userStep.step.description}
                     </StepperDescription>
                   </div>
                 </StepperTrigger>
-                {index < sortedSteps.length - 1 && (
-                  <StepperSeparator className='absolute inset-x-0 top-3 left-[calc(50%+0.75rem+0.125rem)] -order-1 m-0 -translate-y-1/2 group-data-[orientation=horizontal]/stepper:w-[calc(100%-1.5rem-0.25rem)] group-data-[orientation=horizontal]/stepper:flex-none' />
-                )}
+                {index < sortedSteps.length - 1 && <StepperSeparator className='md:mx-2' />}
               </StepperItem>
             ))}
           </Stepper>
@@ -75,15 +76,23 @@ export function OnboardingFlow({ flow }: OnboardingFlowProps) {
       </Card>
 
       {currentUserStep && (
-        <OnboardingStepFactory
-          userStep={currentUserStep}
-          onComplete={() => {
-            const nextIndex = currentStepIndex + 1
-            if (nextIndex < sortedSteps.length) {
-              setCurrentStepIndex(nextIndex)
-            }
-          }}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle>{currentUserStep.step.name}</CardTitle>
+            <p className='text-muted-foreground'>{currentUserStep.step.description}</p>
+          </CardHeader>
+          <CardContent>
+            <OnboardingStepFactory
+              userStep={currentUserStep}
+              onComplete={() => {
+                const nextIndex = currentStepIndex + 1
+                if (nextIndex < sortedSteps.length) {
+                  setCurrentStepIndex(nextIndex)
+                }
+              }}
+            />
+          </CardContent>
+        </Card>
       )}
     </div>
   )
