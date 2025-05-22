@@ -115,6 +115,16 @@ export const httpClient = {
       body: data instanceof FormData ? data : JSON.stringify(data),
       ...options,
     }),
+  patch: <T>(
+    endpoint: string,
+    data: FormData | Record<string, unknown>,
+    options?: RequestOptions,
+  ) =>
+    request<T>(endpoint, {
+      method: 'PATCH',
+      body: data instanceof FormData ? data : JSON.stringify(data),
+      ...options,
+    }),
   delete: <T>(endpoint: string, options?: RequestOptions) =>
     request<T>(endpoint, { method: 'DELETE', ...options }),
 }
