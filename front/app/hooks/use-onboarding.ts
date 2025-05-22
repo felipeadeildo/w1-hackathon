@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import {
   getCurrentActiveStep,
   getCurrentOnboardingFlow,
@@ -37,6 +38,22 @@ export function useCurrentActiveStep() {
     queryKey: ['onboardingActiveStep'],
     queryFn: getCurrentActiveStep,
   })
+}
+
+/**
+ * Hook to check if onboarding is complete, using the flow data
+ * instead of making an additional request
+ */
+export function useIsOnboardingComplete() {
+  const { data: flow } = useOnboardingFlow()
+
+  return useMemo(
+    () => ({
+      data: flow?.is_completed === true,
+      isLoading: flow === undefined,
+    }),
+    [flow],
+  )
 }
 
 /**

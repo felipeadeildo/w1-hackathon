@@ -8,6 +8,7 @@ export default [
     prefix('app', [
       index('routes/dashboard.tsx'),
       route('holding/:holdingId', 'routes/holding.tsx'),
+      route('onboarding', 'routes/onboarding.tsx'),
     ]),
   ),
 ] satisfies RouteConfig
