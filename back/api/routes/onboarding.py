@@ -43,7 +43,7 @@ async def get_current_onboarding_flow(
             detail="No active onboarding flow found for this user",
         )
 
-    return UserOnboardingFlowRead.model_validate(user_flow)
+    return user_flow  # type: ignore
 
 
 @router.get("/step/{step_id}", response_model=UserOnboardingStepRead)
@@ -66,7 +66,7 @@ async def get_onboarding_step(
             status_code=status.HTTP_404_NOT_FOUND, detail="Step not found in user's onboarding flow"
         )
 
-    return UserOnboardingStepRead.model_validate(user_step)
+    return user_step  # type: ignore
 
 
 @router.patch("/step/{user_step_id}/data", response_model=UserOnboardingStepRead)
@@ -98,7 +98,7 @@ async def update_step_data(
         session=session, user_step_id=user_step_id, data=step_data.data
     )
 
-    return UserOnboardingStepRead.model_validate(updated_step)
+    return updated_step  # type: ignore
 
 
 @router.patch("/step/{user_step_id}/status", response_model=UserOnboardingStepRead)
@@ -135,4 +135,4 @@ async def update_step_status(
     if status_update.is_completed and is_completed:
         complete_onboarding_flow(session, user_flow.id)  # type: ignore
 
-    return UserOnboardingStepRead.model_validate(updated_step)
+    return updated_step  # type: ignore
