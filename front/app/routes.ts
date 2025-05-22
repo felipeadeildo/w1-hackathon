@@ -7,7 +7,6 @@ export default [
     'layouts/protected.tsx',
     prefix('app', [
       index('routes/dashboard.tsx'),
-      route('holding/:holdingId', 'routes/holding.tsx'),
       route('onboarding', 'routes/onboarding.tsx'),
     ]),
   ),
