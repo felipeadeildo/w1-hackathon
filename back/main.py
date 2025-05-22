@@ -35,7 +35,7 @@ app.add_middleware(
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(holdings.router, prefix="/api/holdings", tags=["holdings"])
 app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
-app.include_router(onboarding.router, prefix="/api", tags=["onboarding"])
+app.include_router(onboarding.router, prefix="/api/onboarding", tags=["onboarding"])
 
 
 @app.get("/")
