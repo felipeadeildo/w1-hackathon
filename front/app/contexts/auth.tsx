@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState, type ReactNode } from 'react'
-import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import * as auth from '~/lib/auth'
 import type { SignupInput } from '~/schemas/auth'
@@ -9,8 +8,8 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, password: string) => Promise<boolean>
-  signup: (data: SignupInput) => Promise<boolean>
+  login: (email: string, password: string) => Promise<User | null>
+  signup: (data: SignupInput) => Promise<User | null>
   logout: () => void
 }
 
@@ -18,16 +17,14 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
-  login: async () => false,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  signup: async (data: SignupInput) => false,
+  login: async () => null,
+  signup: async () => null,
   logout: () => {},
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const navigate = useNavigate()
 
   useEffect(() => {
     const loadUser = async () => {
@@ -37,9 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentUser)
       } catch (error) {
         console.error('Failed to load user:', error)
-        // if (error instanceof Error) {
-        //   toast.error(error.message)
-        // }
         auth.logout()
       } finally {
         setIsLoading(false)
@@ -49,12 +43,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loadUser()
   }, [])
 
-  useEffect(() => {
-    if (!isLoading && user) {
-      navigate('/app', { replace: true })
-    }
-  }, [user, isLoading, navigate])
-
   const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
@@ -62,13 +50,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const user = await auth.getCurrentUser()
       setUser(user)
       toast.success('Login realizado com sucesso!')
-      return true
+      return user
     } catch (error) {
       console.error('Login failed:', error)
       if (error instanceof Error) {
         toast.error(error.message)
       }
-      return false
+      return null
     } finally {
       setIsLoading(false)
     }
@@ -81,13 +69,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const user = await auth.getCurrentUser()
       setUser(user)
       toast.success('Conta criada com sucesso!')
-      return true
+      return user
     } catch (error) {
       console.error('Signup failed:', error)
       if (error instanceof Error) {
         toast.error(error.message)
       }
-      return false
+      return null
     } finally {
       setIsLoading(false)
     }

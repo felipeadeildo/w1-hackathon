@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { UserPlus } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router'
 import { Button } from '~/components/ui/button'
 import {
   Form,
@@ -17,13 +18,17 @@ import { signupSchema, type SignupInput } from '~/schemas/auth'
 
 export const SignupForm = () => {
   const { signup, isLoading } = useAuth()
+  const navigate = useNavigate()
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: { email: '', password: '', passwordConfirm: '', name: '' },
   })
 
   const onSubmit = async (data: SignupInput) => {
-    await signup(data)
+    const user = await signup(data)
+    if (user) {
+      navigate('/app', { replace: true })
+    }
   }
 
   return (
