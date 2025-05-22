@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import * as auth from '~/lib/auth'
 import type { SignupInput } from '~/schemas/auth'
+import * as auth from '~/services/auth'
 import type { User } from '~/types/user'
 
 interface AuthContextType {

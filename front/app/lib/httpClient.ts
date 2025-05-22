@@ -24,11 +24,12 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse
 interface RequestOptions extends RequestInit {
   useAuth?: boolean
   params?: Record<string, unknown>
+  onUploadProgress?: (progressEvent: ProgressEvent) => void
 }
 
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<ApiResponse<T>> {
   try {
-    const { useAuth = true, params, ...customOptions } = options
+    const { useAuth = true, params, onUploadProgress, ...customOptions } = options
 
     let url = endpoint
     if (params) {
@@ -51,6 +52,80 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
       if (token) {
         headers.append('Authorization', `Bearer ${token}`)
       }
+    }
+
+    // If we have a progress callback and the request has a body, use XHR for progress tracking
+    if (onUploadProgress && options.body instanceof FormData) {
+      return new Promise((resolve) => {
+        const xhr = new XMLHttpRequest()
+
+        xhr.upload.addEventListener('progress', onUploadProgress)
+
+        xhr.addEventListener('load', () => {
+          let data
+          try {
+            data = JSON.parse(xhr.responseText)
+          } catch {
+            data = { detail: 'Failed to parse response' }
+          }
+
+          const responseHeaders: Record<string, string> = {}
+          xhr
+            .getAllResponseHeaders()
+            .split('\r\n')
+            .forEach((header) => {
+              const [key, value] = header.split(': ')
+              if (key) responseHeaders[key.toLowerCase()] = value
+            })
+
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve({
+              success: true,
+              data,
+              metadata: {
+                headers: responseHeaders,
+                status: xhr.status,
+              },
+            } as ApiSuccessResponse<T>)
+          } else {
+            if (xhr.status === 422) {
+              resolve({
+                success: false,
+                detail: 'Dados inválidos. Por favor, verifique as informações enviadas.',
+                status: xhr.status,
+              })
+            } else {
+              resolve({
+                success: false,
+                detail: data.detail || `Erro inesperado (${xhr.status})`,
+                status: xhr.status,
+              })
+            }
+          }
+        })
+
+        xhr.addEventListener('error', () => {
+          resolve({
+            success: false,
+            detail: 'Erro de conexão com o servidor',
+          })
+        })
+
+        xhr.open(options.method || 'GET', `${API_BASE_URL}${url}`, true)
+
+        // Add headers
+        headers.forEach((value, key) => {
+          xhr.setRequestHeader(key, value)
+        })
+
+        // Ensure we're only sending FormData in this flow
+        if (options.body instanceof FormData) {
+          xhr.send(options.body)
+        } else {
+          console.error('XHR upload only supports FormData')
+          xhr.send(null)
+        }
+      })
     }
 
     const response = await fetch(`${API_BASE_URL}${url}`, {

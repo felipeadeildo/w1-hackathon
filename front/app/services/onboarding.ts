@@ -1,5 +1,5 @@
+import { httpClient } from '~/lib/httpClient'
 import type { StepDataObject, UserOnboardingFlow, UserOnboardingStep } from '~/types/onboarding'
-import { httpClient } from './httpClient'
 
 /**
  * Get the current user's onboarding flow with all steps

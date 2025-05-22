@@ -6,7 +6,7 @@ import {
   getOnboardingStep,
   updateStepData,
   updateStepStatus,
-} from '~/lib/onboarding'
+} from '~/services/onboarding'
 import type { StepDataObject } from '~/types/onboarding'
 
 /**

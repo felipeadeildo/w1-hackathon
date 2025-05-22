@@ -1,5 +1,5 @@
 import type { User } from '~/types/user'
-import httpClient, { AUTH_TOKEN_KEY } from './httpClient'
+import httpClient, { AUTH_TOKEN_KEY } from '../lib/httpClient'
 
 interface LoginCredentials {
   email: string
