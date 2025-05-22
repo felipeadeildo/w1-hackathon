@@ -13,6 +13,13 @@ from models.holding.document import (
 )
 from models.holding.simulation import SimulationResult, TaxSavingDetail
 from models.holding.tracking import HoldingActivity
+from models.onboarding import (
+    OnboardingFlow,
+    OnboardingStep,
+    OnboardingStepType,
+    UserOnboardingFlow,
+    UserOnboardingStep,
+)
 from models.user import FamilyMember, User, UserProfile
 
 # Ensure all models are available at the module level for SQLModel and Alembic
@@ -32,11 +39,16 @@ __all__ = [
     "HoldingAsset",
     "HoldingStage",
     "Message",
+    "OnboardingFlow",
+    "OnboardingStep",
+    "OnboardingStepType",
     "SQLModel",
     "SimulationResult",
     "TaxSavingDetail",
     "TimeStampModel",
     "UUIDModel",
     "User",
+    "UserOnboardingFlow",
+    "UserOnboardingStep",
     "UserProfile",
 ]
