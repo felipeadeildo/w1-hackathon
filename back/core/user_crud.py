@@ -1,7 +1,6 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 from core.security import get_password_hash, verify_password
@@ -137,47 +136,41 @@ def authenticate_user(session: Session, email: str, password: str) -> User | Non
 
 
 def get_user_onboarding_flow(session: Session, user_id: uuid.UUID) -> UserOnboardingFlow | None:
-    """Get the active onboarding flow for a user"""
-    query = (
-        select(UserOnboardingFlow)
-        .where((UserOnboardingFlow.user_id == user_id) & (not UserOnboardingFlow.is_completed))
-        .options(
-            selectinload(UserOnboardingFlow.flow),  # type: ignore
-            selectinload(UserOnboardingFlow.user_steps).selectinload(UserOnboardingStep.step),  # type: ignore
-        )
-    )
-    return session.exec(query).first()
+    """Get the onboarding flow for a user"""
+    statement = select(UserOnboardingFlow).where(UserOnboardingFlow.user_id == user_id)
+    return session.exec(statement).first()
 
 
 def get_user_onboarding_step(
     session: Session, step_id: int, user_flow_id: int
 ) -> UserOnboardingStep | None:
-    """Get specific onboarding step for a user"""
-    query = select(UserOnboardingStep).where(
-        (UserOnboardingStep.step_id == step_id) & (UserOnboardingStep.user_flow_id == user_flow_id)
+    """Get a specific step from a user's onboarding flow"""
+    statement = select(UserOnboardingStep).where(
+        UserOnboardingStep.step_id == step_id, UserOnboardingStep.user_flow_id == user_flow_id
     )
-    return session.exec(query).one_or_none()
+    return session.exec(statement).first()
 
 
 def update_onboarding_step(
-    session: Session, user_step_id: int, is_completed: bool | None = None, data: dict | None = None
+    session: Session,
+    user_step_id: int,
+    data: dict | None = None,
+    is_completed: bool | None = None,
 ) -> UserOnboardingStep:
-    """Update a user's onboarding step with progress data"""
+    """Update an onboarding step's data or completion status"""
     user_step = session.get(UserOnboardingStep, user_step_id)
     if not user_step:
-        raise ValueError(f"User step with ID {user_step_id} not found")
+        raise ValueError(f"UserOnboardingStep with id {user_step_id} not found")
+
+    if data is not None:
+        user_step.data = data
 
     if is_completed is not None:
         user_step.is_completed = is_completed
-        if is_completed and not user_step.completed_at:
+        if is_completed:
             user_step.completed_at = datetime.now(UTC)
-        if not user_step.started_at:
-            user_step.started_at = datetime.now(UTC)
-
-    if data is not None:
-        existing_data = user_step.data or {}
-        existing_data.update(data)
-        user_step.data = existing_data
+        else:
+            user_step.completed_at = None
 
     session.add(user_step)
     session.commit()
@@ -185,21 +178,21 @@ def update_onboarding_step(
     return user_step
 
 
-def check_onboarding_flow_completion(session: Session, flow_id: int) -> bool:
-    """Check if all steps in an onboarding flow are completed"""
-    query = select(UserOnboardingStep).where(
-        (UserOnboardingStep.user_flow_id == flow_id) & (not UserOnboardingStep.is_completed)
+def check_onboarding_flow_completion(session: Session, user_flow_id: int) -> bool:
+    """Check if all steps in a user's onboarding flow are completed"""
+    statement = select(UserOnboardingStep).where(
+        UserOnboardingStep.user_flow_id == user_flow_id,
+        UserOnboardingStep.is_completed == False,  # noqa
     )
-    incomplete_steps = session.exec(query).all()
-
+    incomplete_steps = session.exec(statement).all()
     return len(incomplete_steps) == 0
 
 
-def complete_onboarding_flow(session: Session, flow_id: int) -> UserOnboardingFlow:
-    """Mark an onboarding flow as completed"""
-    user_flow = session.get(UserOnboardingFlow, flow_id)
+def complete_onboarding_flow(session: Session, user_flow_id: int) -> UserOnboardingFlow:
+    """Mark a user's onboarding flow as completed"""
+    user_flow = session.get(UserOnboardingFlow, user_flow_id)
     if not user_flow:
-        raise ValueError(f"User flow with ID {flow_id} not found")
+        raise ValueError(f"UserOnboardingFlow with id {user_flow_id} not found")
 
     user_flow.is_completed = True
     user_flow.completed_at = datetime.now(UTC)
