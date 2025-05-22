@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from models.holding.asset import Asset
     from models.holding.chat import ChatSession
     from models.holding.core import Holding
+    from models.onboarding import UserOnboardingFlow
 
 
 class User(TimeStampModel, UUIDModel, table=True):
@@ -44,6 +45,9 @@ class User(TimeStampModel, UUIDModel, table=True):
         sa_relationship_kwargs={"foreign_keys": "[Holding.consultant_id]", "lazy": "selectin"}
     )
     assets: list["Asset"] = Relationship(back_populates="owner")
+
+    # Relacionamento com onboarding
+    onboarding_flows: list["UserOnboardingFlow"] = Relationship(back_populates="user")
 
 
 class UserProfile(TimeStampModel, table=True):
