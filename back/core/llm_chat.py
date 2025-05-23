@@ -1,6 +1,5 @@
 import uuid
 from collections.abc import AsyncGenerator
-from datetime import UTC, datetime
 
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.messages import (
@@ -348,11 +347,10 @@ class LLMChatService:
     ) -> None:
         """Salva dados estruturados no step"""
 
-        if not user_step.data:
+        if user_step.data is None:
             user_step.data = {}
 
-        user_step.data["structured_data"] = structured_data.model_dump()
-        user_step.data["last_updated"] = datetime.now(UTC).isoformat()
+        user_step.data = structured_data.model_dump()
 
         session.add(user_step)
         session.commit()
