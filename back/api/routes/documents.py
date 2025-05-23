@@ -98,6 +98,8 @@ def upload_user_step_document(
     file_type = content_type.split("/")[0]
     file_size = len(file.file.read())
     file.file.seek(0)
+    with open(file_path, "wb") as f:
+        f.write(file.file.read())
 
     document = Document(
         user_step_id=user_step_id,
