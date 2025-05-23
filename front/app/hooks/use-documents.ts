@@ -6,10 +6,9 @@ import {
   getStepDocumentRequirements,
   getUserStepDocument,
   getUserStepDocuments,
-  uploadDocumentForRequirement,
   uploadUserStepDocument,
 } from '~/services/document'
-import type { DocumentRequirement, DocumentUpload, UploadProgressEvent } from '~/types/document'
+import type { DocumentRequirement, UploadProgressEvent } from '~/types/document'
 
 /**
  * Hook to fetch document requirements for a specific step
@@ -73,36 +72,21 @@ export function useUploadUserStepDocument() {
   return useMutation({
     mutationFn: (params: {
       userStepId: number
-      document: DocumentUpload & { file?: File }
+      requirementId: string
+      file: File
       onProgress?: (event: UploadProgressEvent) => void
-    }) => uploadUserStepDocument(params.userStepId, params.document, params.onProgress),
+    }) =>
+      uploadUserStepDocument(
+        params.userStepId,
+        params.requirementId,
+        params.file,
+        params.onProgress,
+      ),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['userStepDocuments', variables.userStepId] })
       queryClient.invalidateQueries({ queryKey: ['onboardingStep', variables.userStepId] })
       queryClient.invalidateQueries({ queryKey: ['onboardingFlow'] })
-    },
-  })
-}
-
-/**
- * Hook for uploading a document for a specific requirement with progress tracking
- */
-export function useUploadDocumentForRequirement() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (params: {
-      requirementId: string
-      document: DocumentUpload & { file?: File }
-      onProgress?: (event: UploadProgressEvent) => void
-    }) => uploadDocumentForRequirement(params.requirementId, params.document, params.onProgress),
-    onSuccess: (document) => {
-      // Since we don't know the userStepId beforehand (backend resolves it),
-      // we need to invalidate queries more broadly
-      queryClient.invalidateQueries({ queryKey: ['userStepDocuments'] })
-      queryClient.invalidateQueries({ queryKey: ['documentRequirements'] })
-      queryClient.invalidateQueries({ queryKey: ['onboardingFlow'] })
-      queryClient.invalidateQueries({ queryKey: ['document', document.requirement_id] })
+      queryClient.invalidateQueries({ queryKey: ['document', variables.requirementId] })
     },
   })
 }

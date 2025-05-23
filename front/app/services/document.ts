@@ -1,10 +1,5 @@
 import { httpClient } from '~/lib/httpClient'
-import type {
-  Document,
-  DocumentRequirement,
-  DocumentUpload,
-  UploadProgressEvent,
-} from '~/types/document'
+import type { Document, DocumentRequirement, UploadProgressEvent } from '~/types/document'
 
 /**
  * Get document requirements for a specific onboarding step
@@ -57,25 +52,24 @@ export const getUserStepDocuments = async (userStepId: number): Promise<Document
  */
 export const uploadUserStepDocument = async (
   userStepId: number,
-  document: DocumentUpload & { file?: File }, // Add optional file property
+  requirementId: string,
+  file: File,
   onProgress?: (event: UploadProgressEvent) => void,
 ): Promise<Document> => {
   // Create a FormData object to handle file upload
   const formData = new FormData()
+  formData.append('file', file)
 
-  // Add all DocumentUpload fields to FormData
-  Object.entries(document).forEach(([key, value]) => {
-    if (key !== 'file' && value !== undefined) {
-      formData.append(key, String(value))
-    }
-  })
-
-  // If we have a file object, add it properly
-  if (document.file) {
-    formData.append('file', document.file, document.original_filename)
+  // Configure the upload options
+  const options: RequestInit & {
+    onUploadProgress?: (progressEvent: ProgressEvent) => void
+    headers?: Record<string, string>
+  } = {
+    // Don't set Content-Type header - browser will automatically set it with correct boundary
+    headers: {
+      // Remove any content-type header that might interfere with the multipart/form-data
+    },
   }
-
-  const options: RequestInit & { onUploadProgress?: (progressEvent: ProgressEvent) => void } = {}
 
   // Add progress tracking if callback is provided
   if (onProgress) {
@@ -88,11 +82,13 @@ export const uploadUserStepDocument = async (
     }
   }
 
-  const response = await httpClient.post<Document>(
-    `/documents/user-steps/${userStepId}/documents`,
-    formData,
-    options,
-  )
+  // Use query parameter for requirement_id
+  const url = `/documents/user-steps/${userStepId}/documents?requirement_id=${encodeURIComponent(
+    requirementId,
+  )}`
+
+  // Make sure httpClient doesn't try to JSON.stringify the FormData
+  const response = await httpClient.post<Document>(url, formData, options)
 
   if (!response.success) {
     throw new Error(response.detail)
@@ -114,56 +110,6 @@ export const getUserStepDocument = async (
   if (!response.success) {
     throw new Error(response.detail)
   }
-  return response.data
-}
-
-/**
- * Upload a document for a specific requirement with progress tracking
- * The backend will resolve the user_step for the current user
- */
-export const uploadDocumentForRequirement = async (
-  requirementId: string,
-  document: DocumentUpload & { file?: File },
-  onProgress?: (event: UploadProgressEvent) => void,
-): Promise<Document> => {
-  // Create a FormData object to handle file upload
-  const formData = new FormData()
-
-  // Add all DocumentUpload fields to FormData
-  Object.entries(document).forEach(([key, value]) => {
-    if (key !== 'file' && value !== undefined) {
-      formData.append(key, String(value))
-    }
-  })
-
-  // If we have a file object, add it properly
-  if (document.file) {
-    formData.append('file', document.file, document.original_filename)
-  }
-
-  const options: RequestInit & { onUploadProgress?: (progressEvent: ProgressEvent) => void } = {}
-
-  // Add progress tracking if callback is provided
-  if (onProgress) {
-    options.onUploadProgress = (progressEvent: ProgressEvent) => {
-      onProgress({
-        loaded: progressEvent.loaded,
-        total: progressEvent.total,
-        progress: progressEvent.loaded / progressEvent.total,
-      })
-    }
-  }
-
-  const response = await httpClient.post<Document>(
-    `/documents/requirements/${requirementId}`,
-    formData,
-    options,
-  )
-
-  if (!response.success) {
-    throw new Error(response.detail)
-  }
-
   return response.data
 }
 

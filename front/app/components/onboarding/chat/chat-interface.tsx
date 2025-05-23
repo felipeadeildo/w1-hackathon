@@ -76,8 +76,8 @@ export function ChatInterface({ userStep }: ChatInterfaceProps) {
               <div className='max-w-sm'>
                 <h3 className='font-medium text-lg mb-2'>Bem-vindo à coleta de dados</h3>
                 <p className='text-muted-foreground text-sm mb-3'>
-                  Converse com o assistente para estruturar seu patrimônio. Quanto mais detalhes você
-                  fornecer, melhor será a análise.
+                  Converse com o assistente para estruturar seu patrimônio. Quanto mais detalhes
+                  você fornecer, melhor será a análise.
                 </p>
               </div>
             </div>

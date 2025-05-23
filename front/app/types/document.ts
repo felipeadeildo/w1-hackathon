@@ -30,18 +30,6 @@ export interface Document {
   status_reason: string | null
   last_validated_at: string | null
 }
-
-export interface DocumentUpload {
-  requirement_id: UUID
-  file_path: string // Path where file will be stored on server
-  original_filename: string
-  file_type: string // Extension or MIME type
-  file_size: number
-  content_type: string
-  file?: File // Optional File object for uploads
-  [key: string]: unknown // Adding index signature to make it compatible with Record<string, unknown>
-}
-
 export interface UploadProgressEvent {
   loaded: number
   total: number

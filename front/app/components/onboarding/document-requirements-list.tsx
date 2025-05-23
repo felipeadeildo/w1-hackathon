@@ -109,6 +109,7 @@ export function DocumentRequirementsList({ stepId, userStepId }: DocumentRequire
                 </div>
               ) : (
                 <DocumentUploader
+                  userStepId={userStepId}
                   requirement={requirement}
                   onUploadComplete={handleUploadComplete}
                 />

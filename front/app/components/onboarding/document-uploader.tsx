@@ -1,29 +1,38 @@
 import { useState } from 'react'
-import { useUploadDocumentForRequirement } from '~/hooks/use-documents'
-import { createFileInputHandler, createProgressHandler } from '~/lib/document-helper'
+import { useUploadUserStepDocument } from '~/hooks/use-documents'
+import { createProgressHandler } from '~/lib/document-helper'
 import type { DocumentRequirement } from '~/types/document'
 
 interface DocumentUploaderProps {
   requirement: DocumentRequirement
+  userStepId: number
   onUploadComplete?: () => void
 }
 
-export function DocumentUploader({ requirement, onUploadComplete }: DocumentUploaderProps) {
+export function DocumentUploader({
+  requirement,
+  userStepId,
+  onUploadComplete,
+}: DocumentUploaderProps) {
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
-  const uploadMutation = useUploadDocumentForRequirement()
+  const uploadMutation = useUploadUserStepDocument()
 
-  const handleFileChange = createFileInputHandler((documentUpload) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
     setError(null)
     setUploading(true)
     setProgress(0)
 
     uploadMutation.mutate(
       {
+        userStepId,
         requirementId: requirement.id as string,
-        document: documentUpload,
+        file, // This should be a valid File object
         onProgress: createProgressHandler((percent) => {
           setProgress(percent)
         }),
@@ -41,7 +50,7 @@ export function DocumentUploader({ requirement, onUploadComplete }: DocumentUplo
         },
       },
     )
-  }, requirement.id)
+  }
 
   return (
     <div className='space-y-4'>
