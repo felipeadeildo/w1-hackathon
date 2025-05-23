@@ -18,11 +18,11 @@ jobs:
       - name: Set up environment variables
         run: |
           echo "API_PORT=${{ secrets.API_PORT }}" >> .env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
 
-      - name: Stop and remove containers
+      - name: Stop containers
         run: |
           docker compose down --remove-orphans
-          docker compose rm -f
         continue-on-error: true
 
       - name: Prune unused volumes
