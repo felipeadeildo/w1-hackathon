@@ -1,4 +1,4 @@
-import { Building2, Coins, Home, LogOut, Settings, Users, type LucideIcon } from 'lucide-react'
+import { Building2, Home, LogOut, Users, type LucideIcon } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
   Sidebar,
@@ -11,7 +11,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
   SidebarTrigger,
   useSidebar,
 } from '~/components/ui/sidebar'
@@ -29,10 +28,8 @@ interface SidebarItem {
 
 const items: SidebarItem[] = [
   { title: 'Dashboard', url: '/app', icon: Home },
-  { title: 'Holdings', url: '/app/holdings', icon: Building2 },
-  { title: 'Ativos', url: '/app/assets', icon: Coins },
-  { title: 'Usuários', url: '/app/users', icon: Users },
-  { title: 'Configurações', url: '/app/settings', icon: Settings },
+  { title: 'Onboarding', url: '/app/onboarding', icon: Users },
+  { title: 'Verificação de Documentos', url: '/app/admin/documents', icon: Building2 },
 ]
 
 export function AppSidebar() {
@@ -82,46 +79,6 @@ export function AppSidebar() {
             <SidebarGroupLabel>Menu</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>{items.map(renderMenuItem)}</SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
-          <SidebarSeparator />
-
-          <SidebarGroup>
-            <SidebarGroupLabel>Holdings</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {[
-                  { title: 'Holding XPTO', url: '/app/holding/1' },
-                  { title: 'Holding Família Silva', url: '/app/holding/2' },
-                  { title: 'Holding Teste', url: '/app/holding/3' },
-                ].map((holding) => (
-                  <SidebarMenuItem key={holding.title}>
-                    {state === 'collapsed' ? (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <SidebarMenuButton asChild>
-                            <a
-                              href={holding.url}
-                              className='flex items-center justify-center w-full'
-                            >
-                              <Building2 className='h-4 w-4' />
-                            </a>
-                          </SidebarMenuButton>
-                        </TooltipTrigger>
-                        <TooltipContent side='right'>{holding.title}</TooltipContent>
-                      </Tooltip>
-                    ) : (
-                      <SidebarMenuButton asChild>
-                        <a href={holding.url} className='flex items-center gap-2'>
-                          <Building2 className='h-4 w-4' />
-                          <span>{holding.title}</span>
-                        </a>
-                      </SidebarMenuButton>
-                    )}
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>

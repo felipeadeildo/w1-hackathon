@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createStepDocumentRequirement,
+  getAdminDocuments,
   getDocumentById,
   getDocumentsForRequirement,
   getStepDocumentRequirements,
   getUserStepDocument,
   getUserStepDocuments,
+  updateAdminDocumentStatus,
   uploadUserStepDocument,
 } from '~/services/document'
 import type { DocumentRequirement, UploadProgressEvent } from '~/types/document'
@@ -110,5 +112,29 @@ export function useDocument(documentId: string) {
     queryKey: ['document', documentId],
     queryFn: () => getDocumentById(documentId),
     enabled: !!documentId,
+  })
+}
+
+/**
+ * Hook to fetch all documents (admin)
+ */
+export function useAdminDocuments() {
+  return useQuery({
+    queryKey: ['adminDocuments'],
+    queryFn: getAdminDocuments,
+  })
+}
+
+/**
+ * Hook to update document status (admin)
+ */
+export function useUpdateAdminDocumentStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (params: { documentId: string; status: 'validated' | 'invalid'; rejectionReason?: string }) =>
+      updateAdminDocumentStatus(params.documentId, params.status, params.rejectionReason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminDocuments'] })
+    },
   })
 }

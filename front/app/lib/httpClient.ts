@@ -1,6 +1,6 @@
 export const AUTH_TOKEN_KEY = 'auth_token'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 
 export interface ResponseMetadata {
   headers: Record<string, string>

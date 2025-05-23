@@ -5,6 +5,10 @@ export default [
   route('auth', 'routes/auth.tsx'),
   layout(
     'layouts/protected.tsx',
-    prefix('app', [index('routes/dashboard.tsx'), route('onboarding', 'routes/onboarding.tsx')]),
+    prefix('app', [
+      index('routes/dashboard.tsx'),
+      route('onboarding', 'routes/onboarding.tsx'),
+      ...prefix('admin', [route('documents', 'routes/admin-documents.tsx')]),
+    ]),
   ),
 ] satisfies RouteConfig

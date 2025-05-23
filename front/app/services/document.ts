@@ -134,3 +134,32 @@ export const getDocumentById = async (documentId: string): Promise<Document> => 
   }
   return response.data
 }
+
+/**
+ * Admin: Get all submitted documents
+ */
+export const getAdminDocuments = async (): Promise<Document[]> => {
+  const response = await httpClient.get<Document[]>('/admin/documents/')
+  if (!response.success) {
+    throw new Error(response.detail)
+  }
+  return response.data
+}
+
+/**
+ * Admin: Update document status (accept/reject)
+ */
+export const updateAdminDocumentStatus = async (
+  documentId: string,
+  status: 'validated' | 'invalid',
+  rejectionReason?: string,
+): Promise<Document> => {
+  const response = await httpClient.patch<Document>(
+    `/admin/documents/${documentId}/status`,
+    { status, rejection_reason: rejectionReason },
+  )
+  if (!response.success) {
+    throw new Error(response.detail)
+  }
+  return response.data
+}
