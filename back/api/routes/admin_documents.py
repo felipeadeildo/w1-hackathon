@@ -77,12 +77,12 @@ def update_document_status(
     document = session.get(Document, document_id)
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
-    if status not in ["accepted", "rejected"]:
+    if status not in ["validated", "invalid"]:
         raise HTTPException(status_code=400, detail="Invalid status")
     document.status = status
     document.validated_by_user_id = current_user.id
     document.validated_at = datetime.utcnow()
-    if status == "rejected":
+    if status == "invalid":
         document.rejection_reason = rejection_reason
     else:
         document.rejection_reason = None
