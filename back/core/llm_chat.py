@@ -323,7 +323,6 @@ class LLMChatService:
         conversation = session.exec(stmt).first()
 
         if not conversation:
-            # Cria nova conversa
             conversation = Conversation(
                 user_id=user_id,
                 title=f"Chat LLM - Step {step_id}",
@@ -339,8 +338,8 @@ class LLMChatService:
     def get_structured_data_from_step(self, user_step: UserOnboardingStep) -> ChatStructuredData:
         """Extrai dados estruturados do step"""
 
-        if user_step.data and "structured_data" in user_step.data:
-            return ChatStructuredData.model_validate(user_step.data["structured_data"])
+        if user_step.data:
+            return ChatStructuredData.model_validate(user_step.data)
 
         return ChatStructuredData()
 
@@ -364,15 +363,12 @@ class LLMChatService:
     ) -> AsyncGenerator[StreamMessageChunk]:
         """Processa mensagem com streaming da resposta"""
 
-        # Verifica se é step de LLM
         if user_step.step.type != OnboardingStepType.LLM_CHAT:
             yield StreamMessageChunk(type="complete", content="Este step não é de chat LLM")
             return
 
-        # Obtém ou cria conversa
         conversation = await self.get_or_create_conversation(session, user.id, user_step.step_id)
 
-        # Salva mensagem do usuário
         user_message = Message(
             conversation_id=conversation.id,
             sender_id=user.id,
@@ -382,14 +378,11 @@ class LLMChatService:
         session.add(user_message)
         session.commit()
 
-        # Obtém dados estruturados atuais
         structured_data = self.get_structured_data_from_step(user_step)
 
-        # Obtém histórico de mensagens para contexto
         message_history = self._get_message_history(session, conversation.id)
 
         try:
-            # Processa com o agente LLM
             full_response = ""
             async with self.agent.run_stream(
                 message_content, deps=structured_data, message_history=message_history
@@ -398,13 +391,13 @@ class LLMChatService:
                     full_response = chunk
                     yield StreamMessageChunk(type="message", content=chunk)
 
-                # Quando terminar, salva a resposta
                 llm_message = Message(
                     conversation_id=conversation.id,
                     sender_type=SenderType.LLM,
                     content=full_response,
                 )
                 session.add(llm_message)
+                session.commit()
 
                 self.save_structured_data_to_step(session, user_step, structured_data)
 

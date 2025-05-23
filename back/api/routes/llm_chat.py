@@ -41,8 +41,6 @@ async def send_message_stream(
     Cada chunk tem o formato:
     ```
     data: {"type": "message", "content": "texto parcial"}
-    data: {"type": "structured_data", "data": {...}}
-    data: {"type": "progress", "data": {...}}
     data: {"type": "complete"}
     ```
     """
