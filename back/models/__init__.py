@@ -1,7 +1,7 @@
 from sqlmodel import SQLModel
 
 from models.base import TimeStampModel, UUIDModel
-from models.conversation import Conversation, Message
+from models.conversation import Conversation, Message, SenderType
 from models.document import Document, DocumentExtractedData, DocumentRequirement, DocumentReview
 from models.onboarding import (
     OnboardingFlow,
@@ -25,6 +25,7 @@ __all__ = [
     "OnboardingStep",
     "OnboardingStepType",
     "SQLModel",
+    "SenderType",
     "TimeStampModel",
     "UUIDModel",
     "User",

@@ -9,6 +9,7 @@ from sqlmodel import Field, Relationship, SQLModel
 from models.user import User
 
 if TYPE_CHECKING:
+    from models.conversation import Conversation
     from models.document import Document, DocumentRequirement
     from models.user import User
 
@@ -41,6 +42,7 @@ class OnboardingStep(SQLModel, table=True):
     flow: OnboardingFlow = Relationship(back_populates="steps")
     user_steps: list["UserOnboardingStep"] = Relationship(back_populates="step")
     document_requirements: list["DocumentRequirement"] = Relationship(back_populates="step")
+    conversations: list["Conversation"] = Relationship(back_populates="onboarding_step")
 
 
 class UserOnboardingFlow(SQLModel, table=True):
