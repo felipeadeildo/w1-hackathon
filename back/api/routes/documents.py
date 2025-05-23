@@ -1,11 +1,12 @@
+import os
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session, select
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from sqlmodel import Session
 
 from api.dependencies import get_current_user
-from api.schemas.document import DocumentOut, DocumentRequirementOut, DocumentUpload
+from api.schemas.document import DocumentOut, DocumentRequirementOut
 from core.database import get_session
 from models.document import Document, DocumentRequirement
 from models.onboarding import OnboardingStep, UserOnboardingStep
@@ -79,7 +80,8 @@ def list_user_step_documents(
 )
 def upload_user_step_document(
     user_step_id: int,
-    doc: DocumentUpload,
+    requirement_id: uuid.UUID,
+    file: UploadFile,
     session: Annotated[Session, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> ...:
@@ -87,14 +89,24 @@ def upload_user_step_document(
     user_step = session.get(UserOnboardingStep, user_step_id)
     if not user_step:
         raise HTTPException(status_code=404, detail="User onboarding step not found")
+
+    upload_dir = "uploads/documents"
+    os.makedirs(upload_dir, exist_ok=True)
+    unique_name = f"{uuid.uuid4().hex}_{file.filename}"
+    file_path = os.path.join(upload_dir, unique_name)
+    content_type = file.content_type or "application/octet-stream"
+    file_type = content_type.split("/")[0]
+    file_size = len(file.file.read())
+    file.file.seek(0)
+
     document = Document(
         user_step_id=user_step_id,
-        requirement_id=doc.requirement_id,
-        file_path=doc.file_path,
-        original_filename=doc.original_filename,
-        file_type=doc.file_type,
-        file_size=doc.file_size,
-        content_type=doc.content_type,
+        requirement_id=requirement_id,
+        file_path=file_path,
+        original_filename=file.filename or "",
+        file_type=file_type,
+        file_size=file_size,
+        content_type=content_type,
         uploaded_by_id=current_user.id,
         status="uploaded",
     )
@@ -118,59 +130,6 @@ def get_user_step_document(
     document = session.get(Document, document_id)
     if not document or document.user_step_id != user_step_id:
         raise HTTPException(status_code=404, detail="Document not found for this step")
-    return document
-
-
-@router.post(
-    "/requirements/{requirement_id}",
-    response_model=DocumentOut,
-    status_code=status.HTTP_201_CREATED,
-)
-def upload_document(
-    requirement_id: uuid.UUID,
-    doc: DocumentUpload,
-    session: Annotated[Session, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_user)],
-) -> ...:
-    """
-    Upload a document for a requirement.
-    The backend will resolve the user_step for the current user and requirement's step.
-    """
-    requirement = session.get(DocumentRequirement, requirement_id)
-    if not requirement:
-        raise HTTPException(status_code=404, detail="Requirement not found")
-    # Find the current user's onboarding flow and user_step for this step
-    from models.onboarding import UserOnboardingFlow, UserOnboardingStep
-
-    user_flow = session.exec(
-        select(UserOnboardingFlow).where(UserOnboardingFlow.user_id == current_user.id)
-    ).first()
-    if not user_flow:
-        raise HTTPException(status_code=404, detail="User onboarding flow not found")
-    user_step = session.exec(
-        select(UserOnboardingStep).where(
-            (UserOnboardingStep.user_flow_id == user_flow.id)
-            & (UserOnboardingStep.step_id == requirement.step_id)
-        )
-    ).first()
-    if not user_step:
-        raise HTTPException(
-            status_code=404, detail="User onboarding step not found for this requirement"
-        )
-    document = Document(
-        user_step_id=user_step.id,  # type: ignore
-        requirement_id=requirement_id,
-        file_path=doc.file_path,
-        original_filename=doc.original_filename,
-        file_type=doc.file_type,
-        file_size=doc.file_size,
-        content_type=doc.content_type,
-        uploaded_by_id=current_user.id,
-        status="uploaded",
-    )
-    session.add(document)
-    session.commit()
-    session.refresh(document)
     return document
 
 

@@ -20,15 +20,6 @@ class DocumentRequirementOut(BaseModel):
         from_attributes = True
 
 
-class DocumentUpload(BaseModel):
-    requirement_id: uuid.UUID
-    file_path: str
-    original_filename: str
-    file_type: str
-    file_size: int
-    content_type: str
-
-
 class DocumentExtractedDataOut(BaseModel):
     id: uuid.UUID
     document_id: uuid.UUID
