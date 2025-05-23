@@ -66,25 +66,12 @@ export interface ChatStructuredData {
   outros_ativos: OutroAtivoData[]
 }
 
-// === INTERFACES PARA MENSAGENS ===
-
 export interface ChatMessage {
   id: string
   sender_type: 'user' | 'llm' | 'system' | 'consultant'
   content: string
   created_at: string
 }
-
-// === INTERFACES PARA PROGRESSO ===
-
-export interface ChatProgress {
-  completed_sections: number
-  total_sections: number
-  percentage: number
-  missing_data: string[]
-}
-
-// === INTERFACES PARA REQUESTS ===
 
 export interface ChatMessageRequest extends Record<string, unknown> {
   message: string
@@ -95,15 +82,7 @@ export interface ChatResetRequest extends Record<string, unknown> {
   step_id: number
 }
 
-export interface ChatStateResponse {
-  conversation_id: string | null
-  messages: ChatMessage[]
-  structured_data: ChatStructuredData
-  progress: ChatProgress
-  is_completed: boolean
-}
-
-export type StreamMessageChunkType = 'message' | 'structured_data' | 'progress' | 'complete'
+export type StreamMessageChunkType = 'message' | 'complete'
 
 export interface StreamMessageChunk {
   type: StreamMessageChunkType
@@ -113,8 +92,6 @@ export interface StreamMessageChunk {
 
 export interface StreamCallbacks {
   onMessage?: (content: string) => void
-  onStructuredData?: (data: ChatStructuredData) => void
-  onProgress?: (progress: ChatProgress) => void
   onComplete?: (finalContent?: string) => void
   onError?: (error: string) => void
 }

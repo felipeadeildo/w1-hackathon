@@ -2,9 +2,7 @@ import { httpClient } from '~/lib/httpClient'
 import type {
   ChatMessage,
   ChatMessageRequest,
-  ChatProgress,
   ChatResetRequest,
-  ChatStateResponse,
   ChatStructuredData,
   StreamCallbacks,
   StreamMessageChunk,
@@ -66,20 +64,6 @@ export const sendMessageStream = async (
                     }
                     break
 
-                  case 'structured_data':
-                    if (data.data && callbacks.onStructuredData) {
-                      // Corrigido: Conversão segura para o tipo correto
-                      callbacks.onStructuredData(data.data as unknown as ChatStructuredData)
-                    }
-                    break
-
-                  case 'progress':
-                    if (data.data && callbacks.onProgress) {
-                      // Corrigido: Conversão segura para o tipo correto
-                      callbacks.onProgress(data.data as unknown as ChatProgress)
-                    }
-                    break
-
                   case 'complete':
                     if (callbacks.onComplete) {
                       callbacks.onComplete(data.content)
@@ -108,64 +92,10 @@ export const sendMessageStream = async (
 }
 
 /**
- * Send a message to LLM chat without streaming (fallback)
- */
-export const sendMessage = async (
-  request: ChatMessageRequest,
-): Promise<{
-  message: string
-  structured_data?: ChatStructuredData
-  progress?: ChatProgress
-}> => {
-  // Corrigido: Usando request como Record<string, unknown> aqui
-  const response = await httpClient.post<{
-    message: string
-    structured_data?: ChatStructuredData
-    progress?: ChatProgress
-  }>('/llm-chat/message', request as Record<string, unknown>)
-
-  if (!response.success) {
-    throw new Error(response.detail)
-  }
-
-  return response.data
-}
-
-/**
- * Get complete chat state
- */
-export const getChatState = async (stepId: number): Promise<ChatStateResponse> => {
-  const response = await httpClient.get<ChatStateResponse>('/llm-chat/state', {
-    params: { step_id: stepId },
-  })
-
-  if (!response.success) {
-    throw new Error(response.detail)
-  }
-
-  return response.data
-}
-
-/**
- * Get only structured data
+ * Get the structured data
  */
 export const getStructuredData = async (stepId: number): Promise<ChatStructuredData> => {
   const response = await httpClient.get<ChatStructuredData>('/llm-chat/structured-data', {
-    params: { step_id: stepId },
-  })
-
-  if (!response.success) {
-    throw new Error(response.detail)
-  }
-
-  return response.data
-}
-
-/**
- * Get chat progress
- */
-export const getChatProgress = async (stepId: number): Promise<ChatProgress> => {
-  const response = await httpClient.get<ChatProgress>('/llm-chat/progress', {
     params: { step_id: stepId },
   })
 
@@ -210,40 +140,4 @@ export const getChatMessages = async (
   }
 
   return response.data
-}
-
-/**
- * Helper function to format structured data for display
- */
-export const formatStructuredDataSummary = (data: ChatStructuredData): string => {
-  const sections = []
-
-  if (data.imoveis.length > 0) {
-    sections.push(`${data.imoveis.length} imóvel(s)`)
-  }
-
-  if (data.participacoes.length > 0) {
-    sections.push(`${data.participacoes.length} participação(s) societária(s)`)
-  }
-
-  if (data.estrutura_familiar?.estado_civil || data.estrutura_familiar?.conjuge) {
-    sections.push('estrutura familiar')
-  }
-
-  if (data.investimentos.length > 0) {
-    sections.push(`${data.investimentos.length} investimento(s)`)
-  }
-
-  if (data.outros_ativos.length > 0) {
-    sections.push(`${data.outros_ativos.length} outro(s) ativo(s)`)
-  }
-
-  return sections.length > 0 ? `Dados coletados: ${sections.join(', ')}` : 'Nenhum dado coletado'
-}
-
-/**
- * Helper function to check if structured data is complete
- */
-export const isStructuredDataComplete = (progress: ChatProgress): boolean => {
-  return progress.percentage >= 80 // Consider 80% or more as complete
 }

@@ -1,26 +1,25 @@
 import { Briefcase, Building, CircleDollarSign, Users } from 'lucide-react'
-import { Progress } from '~/components/ui/progress'
-import type { ChatProgress, ChatStructuredData } from '~/types/llm-chat'
+import { useChatStructuredData } from '~/hooks/use-llm-chat'
+import type { UserOnboardingStep } from '~/types/onboarding'
 import { EstruturaFamiliarSection } from './estrutura-familiar-section'
 import { ImoveisSection } from './imoveis-section'
 import { OutrosAtivosSection } from './outros-ativos-section'
 import { ParticipacoesSection } from './participacoes-section'
 
 interface StructuredDataDisplayProps {
-  structuredData: ChatStructuredData | null
-  progress: ChatProgress | null
+  userStep: UserOnboardingStep
 }
 
-export function StructuredDataDisplay({ structuredData, progress }: StructuredDataDisplayProps) {
-  // Default data if nothing is loaded yet
-  const data = structuredData || {
-    imoveis: [],
-    participacoes: [],
-    investimentos: [],
-    outros_ativos: [],
-  }
-
-  const percentage = progress?.percentage || 0
+export function StructuredDataDisplay({ userStep }: StructuredDataDisplayProps) {
+  const {
+    data = {
+      imoveis: [],
+      participacoes: [],
+      estrutura_familiar: undefined,
+      investimentos: [],
+      outros_ativos: [],
+    },
+  } = useChatStructuredData(userStep.step_id)
 
   return (
     <>
@@ -28,17 +27,6 @@ export function StructuredDataDisplay({ structuredData, progress }: StructuredDa
       <div className='p-4 border-b bg-muted/20'>
         <h3 className='font-medium'>Dados Estruturados</h3>
         <p className='text-sm text-muted-foreground'>Informações extraídas com base na conversa</p>
-
-        {/* Progress bar */}
-        <div className='mt-4'>
-          <div className='flex justify-between text-sm mb-1'>
-            <span>{percentage}% completo</span>
-            {progress?.missing_data.length ? (
-              <span className='text-amber-600'>Faltam: {progress.missing_data.join(', ')}</span>
-            ) : null}
-          </div>
-          <Progress value={percentage} className='h-2' />
-        </div>
       </div>
 
       {/* Structured data sections */}

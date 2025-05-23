@@ -2,48 +2,39 @@ import { RefreshCcw, Send } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import type { ChatMessage } from '~/types/llm-chat'
+import { useChatMessages, useChatMessageStream, useResetChat } from '~/hooks/use-llm-chat'
+import type { UserOnboardingStep } from '~/types/onboarding'
 import { MessageBubble } from './message-bubble'
 import { TypingIndicator } from './typing-indicator'
 
 interface ChatInterfaceProps {
-  messages: ChatMessage[]
-  isStreaming: boolean
-  currentMessage: string
-  onSendMessage: (message: string) => Promise<void>
-  onResetChat: () => Promise<void>
-  isLoading: boolean
+  userStep: UserOnboardingStep
 }
 
-export function ChatInterface({
-  messages,
-  isStreaming,
-  currentMessage,
-  onSendMessage,
-  onResetChat,
-  isLoading,
-}: ChatInterfaceProps) {
+export function ChatInterface({ userStep }: ChatInterfaceProps) {
   const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Scroll to bottom when messages change or during streaming
+  const { data: messages = [] } = useChatMessages(userStep.step_id)
+  const { currentMessage, sendStreamMessage, isStreaming } = useChatMessageStream(userStep.step_id)
+
+  const { mutate: resetChatMutation } = useResetChat()
+
+  const onResetChat = () => {
+    resetChatMutation({ step_id: userStep.step_id })
+    setInputValue('')
+  }
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, currentMessage])
-
-  // Focus input when component mounts
-  useEffect(() => {
-    if (!isLoading) {
-      inputRef.current?.focus()
-    }
-  }, [isLoading])
 
   const handleSend = async () => {
     if (inputValue.trim() && !isStreaming) {
       const message = inputValue.trim()
       setInputValue('')
-      await onSendMessage(message)
+      await sendStreamMessage(message)
     }
   }
 
@@ -68,7 +59,7 @@ export function ChatInterface({
           variant='ghost'
           size='sm'
           onClick={onResetChat}
-          disabled={isLoading || isStreaming}
+          disabled={isStreaming}
           title='Reiniciar conversa'
         >
           <RefreshCcw className='h-4 w-4 mr-2' />
@@ -125,10 +116,10 @@ export function ChatInterface({
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isStreaming || isLoading}
+            disabled={isStreaming}
             className='flex-1'
           />
-          <Button onClick={handleSend} disabled={!inputValue.trim() || isStreaming || isLoading}>
+          <Button onClick={handleSend} disabled={!inputValue.trim() || isStreaming}>
             <Send className='h-4 w-4' />
             <span className='sr-only'>Enviar</span>
           </Button>
