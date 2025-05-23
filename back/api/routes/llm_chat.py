@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
-from sqlmodel import Session
+from sqlmodel import Session, asc
 
 from api.dependencies import (
     check_rate_limit,
@@ -13,12 +13,9 @@ from api.dependencies import (
 )
 from api.schemas.llm_chat import (
     ChatMessageRequest,
-    ChatProgressResponse,
-    ChatResetRequest,
-    ChatStateResponse,
+    ChatStructuredData,
     MessageResponse,
     StreamMessageChunk,
-    StructuredDataResponse,
 )
 from core.database import get_session
 from core.llm_chat import llm_chat_service
@@ -78,86 +75,8 @@ async def send_message_stream(
     )
 
 
-# === ROTA: ENVIAR MENSAGEM SEM STREAMING (PARA COMPATIBILIDADE) ===
-
-
-@router.post("/message", response_model=dict)
-async def send_message(
-    request: ChatMessageRequest,
-    session: Annotated[Session, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_user)],
-    user_step: Annotated[UserOnboardingStep, Depends(get_validated_user_step)],
-    _: Annotated[None, Depends(validate_llm_chat_enabled)],
-    __: Annotated[None, Depends(check_rate_limit)],
-) -> ...:
-    """
-    Envia uma mensagem para o chat LLM e aguarda resposta completa.
-    Use apenas quando não for possível usar streaming.
-    """
-
-    try:
-        response_content = ""
-        structured_data = None
-        progress_data = None
-
-        async for chunk in llm_chat_service.process_message_stream(
-            session=session, user=current_user, user_step=user_step, message_content=request.message
-        ):
-            if chunk.type == "message":
-                response_content = chunk.content
-            elif chunk.type == "structured_data":
-                structured_data = chunk.data
-            elif chunk.type == "progress":
-                progress_data = chunk.data
-
-        return {
-            "message": response_content,
-            "structured_data": structured_data,
-            "progress": progress_data,
-        }
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao processar mensagem: {e!s}",
-        ) from e
-
-
-# === ROTA: OBTER ESTADO COMPLETO DO CHAT ===
-
-
-@router.get("/state", response_model=ChatStateResponse)
-async def get_chat_state(
-    session: Annotated[Session, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_user)],
-    user_step: Annotated[UserOnboardingStep, Depends(get_validated_user_step)],
-) -> ...:
-    """
-    Obtém o estado completo do chat LLM para o step atual.
-    Inclui histórico de mensagens, dados estruturados e progresso.
-    """
-
-    try:
-        state_data = await llm_chat_service.get_chat_state(
-            session=session, user=current_user, user_step=user_step
-        )
-
-        return ChatStateResponse(**state_data)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao obter estado do chat: {e!s}",
-        ) from e
-
-
-# === ROTA: OBTER APENAS DADOS ESTRUTURADOS ===
-
-
-@router.get("/structured-data", response_model=StructuredDataResponse)
+@router.get("/structured-data", response_model=ChatStructuredData)
 async def get_structured_data(
-    session: Annotated[Session, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_user)],
     user_step: Annotated[UserOnboardingStep, Depends(get_validated_user_step)],
 ) -> ...:
     """
@@ -166,8 +85,7 @@ async def get_structured_data(
     """
 
     try:
-        structured_data = llm_chat_service.get_structured_data_from_step(user_step)
-        return StructuredDataResponse(**structured_data.to_dict())
+        return llm_chat_service.get_structured_data_from_step(user_step)
 
     except Exception as e:
         raise HTTPException(
@@ -176,38 +94,8 @@ async def get_structured_data(
         ) from e
 
 
-# === ROTA: OBTER PROGRESSO ===
-
-
-@router.get("/progress", response_model=ChatProgressResponse)
-async def get_chat_progress(
-    session: Annotated[Session, Depends(get_session)],
-    current_user: Annotated[User, Depends(get_current_user)],
-    user_step: Annotated[UserOnboardingStep, Depends(get_validated_user_step)],
-) -> ...:
-    """
-    Obtém o progresso atual da coleta de dados.
-    """
-
-    try:
-        structured_data = llm_chat_service.get_structured_data_from_step(user_step)
-        progress = structured_data.get_progress()
-
-        return progress
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao obter progresso: {e!s}",
-        ) from e
-
-
-# === ROTA: RESETAR CONVERSA ===
-
-
 @router.post("/reset", response_model=dict)
 async def reset_chat(
-    request: ChatResetRequest,
     session: Annotated[Session, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_user)],
     user_step: Annotated[UserOnboardingStep, Depends(get_validated_user_step)],
@@ -237,9 +125,6 @@ async def reset_chat(
         ) from e
 
 
-# === ROTA: OBTER HISTÓRICO DE MENSAGENS ===
-
-
 @router.get("/messages", response_model=list[MessageResponse])
 async def get_chat_messages(
     session: Annotated[Session, Depends(get_session)],
@@ -254,7 +139,7 @@ async def get_chat_messages(
     """
 
     try:
-        from sqlmodel import desc, select
+        from sqlmodel import select
 
         from models.conversation import Conversation, Message
 
@@ -278,23 +163,14 @@ async def get_chat_messages(
         stmt = (
             select(Message)
             .where(Message.conversation_id == conversation.id)
-            .order_by(desc(Message.created_at))
+            .order_by(asc(Message.created_at))
             .offset(offset)
             .limit(limit)
         )
 
         messages = session.exec(stmt).all()
 
-        # Retorna em ordem cronológica
-        return [
-            MessageResponse(
-                id=msg.id,
-                sender_type=msg.sender_type.value,  # Adicionar .value para converter enum
-                content=msg.content,
-                created_at=msg.created_at,
-            )
-            for msg in reversed(messages)
-        ]
+        return messages
 
     except Exception as e:
         raise HTTPException(

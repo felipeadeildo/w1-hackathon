@@ -1,7 +1,6 @@
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
-from typing import Any
 
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.messages import (
@@ -12,7 +11,7 @@ from pydantic_ai.messages import (
     TextPart,
     UserPromptPart,
 )
-from sqlmodel import Session, asc, desc, select
+from sqlmodel import Session, asc, select
 
 from api.schemas.llm_chat import (
     ChatStructuredData,
@@ -59,6 +58,8 @@ class LLMChatService:
             - Sempre confirme os dados antes de adicioná-los
 
             Seja sempre cordial, profissional e didático. Explique a importância de cada informação para a estruturação patrimonial.
+
+            Sempre que fizer algo, alguma ação, sugira a próxima ação, com base nas tools.
             """,  # noqa
         )
 
@@ -287,18 +288,14 @@ class LLMChatService:
         async def obter_resumo_dados(ctx: RunContext[ChatStructuredData]) -> str:
             """Retorna um resumo dos dados coletados até agora."""
 
-            progress = ctx.deps.get_progress()
-
             resumo = f"""
-            Resumo dos dados coletados ({progress.percentage}% completo):
+            Resumo dos dados coletados:
 
             📍 Imóveis: {len(ctx.deps.imoveis)} item(s)
             🏢 Participações Societárias: {len(ctx.deps.participacoes)} item(s)
             👨‍👩‍👧‍👦 Estrutura Familiar: {"Configurada" if ctx.deps.estrutura_familiar and ctx.deps.estrutura_familiar.estado_civil else "Pendente"}
             💰 Investimentos: {len(ctx.deps.investimentos)} item(s)
             🎯 Outros Ativos: {len(ctx.deps.outros_ativos)} item(s)
-
-            Dados ainda necessários: {", ".join(progress.missing_data) if progress.missing_data else "Todos coletados!"}
             """  # noqa
 
             return resumo
@@ -343,7 +340,7 @@ class LLMChatService:
         """Extrai dados estruturados do step"""
 
         if user_step.data and "structured_data" in user_step.data:
-            return ChatStructuredData.from_dict(user_step.data["structured_data"])
+            return ChatStructuredData.model_validate(user_step.data["structured_data"])
 
         return ChatStructuredData()
 
@@ -355,11 +352,12 @@ class LLMChatService:
         if not user_step.data:
             user_step.data = {}
 
-        user_step.data["structured_data"] = structured_data.to_dict()
+        user_step.data["structured_data"] = structured_data.model_dump()
         user_step.data["last_updated"] = datetime.now(UTC).isoformat()
 
         session.add(user_step)
         session.commit()
+        session.refresh(user_step)
 
     async def process_message_stream(
         self, session: Session, user: User, user_step: UserOnboardingStep, message_content: str
@@ -408,30 +406,13 @@ class LLMChatService:
                 )
                 session.add(llm_message)
 
-                # Salva dados estruturados atualizados
                 self.save_structured_data_to_step(session, user_step, structured_data)
 
-                # Calcula progresso
-                progress = structured_data.get_progress()
+                yield StreamMessageChunk(type="structured_data", data=structured_data.model_dump())
 
-                # Verifica se step está completo
-                if progress.percentage >= 80:  # 80% ou mais considera completo
-                    user_step.is_completed = True
-                    user_step.completed_at = datetime.now(UTC)
-
-                session.commit()
-
-                # Envia dados estruturados atualizados
-                yield StreamMessageChunk(type="structured_data", data=structured_data.to_dict())
-
-                # Envia progresso
-                yield StreamMessageChunk(type="progress", data=progress.model_dump())
-
-                # Indica que terminou
                 yield StreamMessageChunk(type="complete")
 
         except Exception as e:
-            # Em caso de erro, salva mensagem de erro
             error_message = Message(
                 conversation_id=conversation.id,
                 sender_type=SenderType.LLM,
@@ -450,14 +431,11 @@ class LLMChatService:
         stmt = (
             select(Message)
             .where(Message.conversation_id == conversation_id)
-            .order_by(desc(Message.created_at))
+            .order_by(asc(Message.created_at))
             .limit(30)
         )
 
         messages = session.exec(stmt).all()
-
-        # Inverte para ordem cronológica
-        messages = list(reversed(messages))
 
         # Converte para formato do PydanticAI
         model_messages = []
@@ -488,7 +466,6 @@ class LLMChatService:
                     )
                 )
             elif msg.sender_type == SenderType.SYSTEM:
-                # Mensagem do sistema vira ModelRequest com SystemPromptPart
                 model_messages.append(
                     ModelRequest(
                         parts=[
@@ -535,42 +512,6 @@ class LLMChatService:
         except Exception as e:
             session.rollback()
             raise e
-
-    async def get_chat_state(
-        self, session: Session, user: User, user_step: UserOnboardingStep
-    ) -> dict[str, Any]:
-        """Obtém estado completo do chat"""
-
-        # Usar get_or_create_conversation em vez de apenas buscar
-        conversation = await self.get_or_create_conversation(session, user.id, user_step.step_id)
-
-        # Obtém mensagens
-        stmt = (
-            select(Message)
-            .where(Message.conversation_id == conversation.id)
-            .order_by(asc(Message.created_at))
-        )
-        messages = session.exec(stmt).all()
-
-        # Obtém dados estruturados
-        structured_data = self.get_structured_data_from_step(user_step)
-        progress = structured_data.get_progress()
-
-        return {
-            "conversation_id": conversation.id,
-            "messages": [
-                {
-                    "id": msg.id,
-                    "sender_type": msg.sender_type.value,
-                    "content": msg.content,
-                    "created_at": msg.created_at,
-                }
-                for msg in messages
-            ],
-            "structured_data": structured_data.to_dict(),
-            "progress": progress.model_dump(),
-            "is_completed": user_step.is_completed,
-        }
 
 
 # Instância global do service

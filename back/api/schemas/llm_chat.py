@@ -15,15 +15,6 @@ class ChatMessageRequest(BaseModel):
     step_id: int = Field(..., description="ID do step de onboarding")
 
 
-class ChatResetRequest(BaseModel):
-    """Request para resetar conversa do chat LLM"""
-
-    step_id: int = Field(..., description="ID do step de onboarding")
-
-
-# === SCHEMAS DE RESPONSE ===
-
-
 class MessageResponse(BaseModel):
     """Response de uma mensagem individual"""
 
@@ -36,16 +27,6 @@ class MessageResponse(BaseModel):
         from_attributes = True
 
 
-class StructuredDataResponse(BaseModel):
-    """Response dos dados estruturados extraídos"""
-
-    imoveis: list[dict[str, Any]] = Field(default_factory=list)
-    participacoes: list[dict[str, Any]] = Field(default_factory=list)
-    estrutura_familiar: dict[str, Any] = Field(default_factory=dict)
-    investimentos: list[dict[str, Any]] = Field(default_factory=list)
-    outros_ativos: list[dict[str, Any]] = Field(default_factory=list)
-
-
 class ChatProgressResponse(BaseModel):
     """Response do progresso do chat"""
 
@@ -55,25 +36,12 @@ class ChatProgressResponse(BaseModel):
     missing_data: list[str] = Field(default_factory=list)
 
 
-class ChatStateResponse(BaseModel):
-    """Response do estado completo do chat"""
-
-    conversation_id: uuid.UUID
-    messages: list[MessageResponse]
-    structured_data: StructuredDataResponse
-    progress: ChatProgressResponse
-    is_completed: bool = Field(default=False)
-
-
 class StreamMessageChunk(BaseModel):
     """Chunk de mensagem para streaming"""
 
     type: Literal["message", "structured_data", "progress", "complete"]
     content: str = ""
     data: dict[str, Any] | None = None
-
-
-# === SCHEMAS PARA DADOS ESTRUTURADOS ===
 
 
 class ImovelData(BaseModel):
@@ -150,9 +118,6 @@ class OutroAtivoData(BaseModel):
     observacoes: str | None = Field(None, description="Observações adicionais")
 
 
-# === SCHEMA PRINCIPAL DOS DADOS ESTRUTURADOS ===
-
-
 class ChatStructuredData(BaseModel):
     """Dados estruturados completos do chat"""
 
@@ -161,61 +126,3 @@ class ChatStructuredData(BaseModel):
     estrutura_familiar: EstruturaFamiliarData | None = None
     investimentos: list[InvestimentoData] = Field(default_factory=list)
     outros_ativos: list[OutroAtivoData] = Field(default_factory=list)
-
-    def to_dict(self) -> dict[str, Any]:
-        """Converte para dict para salvar no JSON"""
-        return self.model_dump(exclude_none=True)
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ChatStructuredData":
-        """Cria instância a partir de dict do JSON"""
-        return cls(**data)
-
-    def get_progress(self) -> ChatProgressResponse:
-        """Calcula o progresso da coleta de dados"""
-        total_sections = 5
-        completed_sections = 0
-        missing_data = []
-
-        # Verifica imóveis
-        if self.imoveis:
-            completed_sections += 1
-        else:
-            missing_data.append("Imóveis")
-
-        # Verifica participações
-        if self.participacoes:
-            completed_sections += 1
-        else:
-            missing_data.append("Participações Societárias")
-
-        # Verifica estrutura familiar
-        if self.estrutura_familiar and (
-            self.estrutura_familiar.estado_civil
-            or self.estrutura_familiar.conjuge
-            or self.estrutura_familiar.filhos
-        ):
-            completed_sections += 1
-        else:
-            missing_data.append("Estrutura Familiar")
-
-        # Verifica investimentos
-        if self.investimentos:
-            completed_sections += 1
-        else:
-            missing_data.append("Investimentos")
-
-        # Verifica outros ativos
-        if self.outros_ativos:
-            completed_sections += 1
-        else:
-            missing_data.append("Outros Ativos")
-
-        percentage = int((completed_sections / total_sections) * 100)
-
-        return ChatProgressResponse(
-            completed_sections=completed_sections,
-            total_sections=total_sections,
-            percentage=percentage,
-            missing_data=missing_data,
-        )
