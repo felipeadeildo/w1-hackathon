@@ -110,9 +110,9 @@ export const getStructuredData = async (stepId: number): Promise<ChatStructuredD
  * Reset chat conversation and structured data
  */
 export const resetChat = async (request: ChatResetRequest): Promise<{ message: string }> => {
-  // Corrigido: Usando request como Record<string, unknown> aqui
+  const { step_id } = request
   const response = await httpClient.post<{ message: string }>(
-    '/llm-chat/reset',
+    '/llm-chat/reset?step_id=' + step_id,
     request as Record<string, unknown>,
   )
 
