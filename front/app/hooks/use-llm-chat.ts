@@ -74,7 +74,7 @@ export function useChatMessageStream(stepId: number) {
           { message, step_id: stepId },
           {
             onMessage: (content) => {
-              setCurrentMessage((prev) => prev + content)
+              setCurrentMessage(content)
             },
             onComplete: () => {
               setIsStreaming(false)

@@ -2,6 +2,7 @@ import { RefreshCcw, Send } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
+import { ScrollArea } from '~/components/ui/scroll-area'
 import { useChatMessages, useChatMessageStream, useResetChat } from '~/hooks/use-llm-chat'
 import type { UserOnboardingStep } from '~/types/onboarding'
 import { MessageBubble } from './message-bubble'
@@ -46,12 +47,12 @@ export function ChatInterface({ userStep }: ChatInterfaceProps) {
   }
 
   return (
-    <>
+    <div className='flex flex-col h-full'>
       {/* Chat Header */}
-      <div className='p-4 border-b bg-muted/20 flex items-center justify-between'>
+      <div className='p-3 border-b bg-muted/20 flex items-center justify-between'>
         <div>
           <h3 className='font-medium'>Assistente W1</h3>
-          <p className='text-sm text-muted-foreground'>
+          <p className='text-xs text-muted-foreground'>
             Coletando informações para estruturação patrimonial
           </p>
         </div>
@@ -62,53 +63,55 @@ export function ChatInterface({ userStep }: ChatInterfaceProps) {
           disabled={isStreaming}
           title='Reiniciar conversa'
         >
-          <RefreshCcw className='h-4 w-4 mr-2' />
+          <RefreshCcw className='h-4 w-4 mr-1' />
           Reiniciar
         </Button>
       </div>
 
-      {/* Messages */}
-      <div className='flex-1 overflow-y-auto p-4 space-y-4'>
-        {messages.length === 0 ? (
-          <div className='h-full flex items-center justify-center text-center p-4'>
-            <div className='max-w-sm'>
-              <h3 className='font-medium text-lg mb-2'>Bem-vindo à coleta de dados</h3>
-              <p className='text-muted-foreground mb-4'>
-                Converse com o assistente para estruturar seu patrimônio. Quanto mais detalhes você
-                fornecer, melhor será a análise.
-              </p>
+      {/* Messages - Using ScrollArea for better scrolling */}
+      <ScrollArea className='flex-1'>
+        <div className='p-3 space-y-3'>
+          {messages.length === 0 ? (
+            <div className='h-full flex items-center justify-center text-center p-4'>
+              <div className='max-w-sm'>
+                <h3 className='font-medium text-lg mb-2'>Bem-vindo à coleta de dados</h3>
+                <p className='text-muted-foreground text-sm mb-3'>
+                  Converse com o assistente para estruturar seu patrimônio. Quanto mais detalhes você
+                  fornecer, melhor será a análise.
+                </p>
+              </div>
             </div>
-          </div>
-        ) : (
-          <>
-            {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
-            ))}
+          ) : (
+            <>
+              {messages.map((message) => (
+                <MessageBubble key={message.id} message={message} />
+              ))}
 
-            {/* Show streaming message if applicable */}
-            {isStreaming && currentMessage && (
-              <MessageBubble
-                message={{
-                  id: 'streaming',
-                  content: currentMessage,
-                  sender_type: 'llm',
-                  created_at: new Date().toISOString(),
-                }}
-                isStreaming
-              />
-            )}
+              {/* Show streaming message if applicable */}
+              {isStreaming && currentMessage && (
+                <MessageBubble
+                  message={{
+                    id: 'streaming',
+                    content: currentMessage,
+                    sender_type: 'llm',
+                    created_at: new Date().toISOString(),
+                  }}
+                  isStreaming
+                />
+              )}
 
-            {/* Show typing indicator during initial streaming phase */}
-            {isStreaming && !currentMessage && <TypingIndicator />}
-          </>
-        )}
+              {/* Show typing indicator during initial streaming phase */}
+              {isStreaming && !currentMessage && <TypingIndicator />}
+            </>
+          )}
 
-        {/* Empty div for scroll reference */}
-        <div ref={messagesEndRef} />
-      </div>
+          {/* Empty div for scroll reference */}
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
 
       {/* Input Area */}
-      <div className='p-4 border-t bg-background'>
+      <div className='p-3 border-t bg-background'>
         <div className='flex space-x-2'>
           <Input
             ref={inputRef}
@@ -125,6 +128,6 @@ export function ChatInterface({ userStep }: ChatInterfaceProps) {
           </Button>
         </div>
       </div>
-    </>
+    </div>
   )
 }

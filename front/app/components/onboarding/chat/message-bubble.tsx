@@ -23,24 +23,24 @@ export function MessageBubble({ message, isStreaming = false }: MessageBubblePro
   return (
     <div
       className={cn(
-        'flex items-start gap-3 max-w-3xl',
+        'flex items-start gap-2 max-w-[90%]',
         isUser ? 'ml-auto flex-row-reverse' : 'mr-auto',
       )}
     >
       {/* Avatar */}
       <div
         className={cn(
-          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
+          'flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center',
           isUser ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
         )}
       >
-        {isUser ? <User className='h-4 w-4' /> : <Bot className='h-4 w-4' />}
+        {isUser ? <User className='h-3.5 w-3.5' /> : <Bot className='h-3.5 w-3.5' />}
       </div>
 
       {/* Message bubble */}
       <div
         className={cn(
-          'rounded-lg p-3 text-sm',
+          'rounded-lg py-2 px-3 text-sm',
           isUser
             ? 'bg-primary text-primary-foreground rounded-tr-none'
             : 'bg-muted text-foreground rounded-tl-none',
@@ -50,7 +50,7 @@ export function MessageBubble({ message, isStreaming = false }: MessageBubblePro
         <p className='whitespace-pre-wrap'>{message.content}</p>
         <p
           className={cn(
-            'text-xs mt-1',
+            'text-[10px] mt-1',
             isUser ? 'text-primary-foreground/70' : 'text-muted-foreground',
           )}
         >

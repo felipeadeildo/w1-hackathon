@@ -1,4 +1,10 @@
-import { Briefcase, Building, CircleDollarSign, Users } from 'lucide-react'
+import { Briefcase, Bui  return (
+    <div className='flex flex-col h-full'>
+      {/* Header */}
+      <div className='p-3 border-b bg-muted/20'>
+        <h3 className='font-medium text-sm'>Dados Estruturados</h3>
+        <p className='text-xs text-muted-foreground'>Informações extraídas com base na conversa</p>
+      </div>CircleDollarSign, Users } from 'lucide-react'
 import { useChatStructuredData } from '~/hooks/use-llm-chat'
 import type { UserOnboardingStep } from '~/types/onboarding'
 import { EstruturaFamiliarSection } from './estrutura-familiar-section'
@@ -22,7 +28,7 @@ export function StructuredDataDisplay({ userStep }: StructuredDataDisplayProps) 
   } = useChatStructuredData(userStep.step_id)
 
   return (
-    <div className='flex flex-col h-full'>
+    <>
       {/* Header */}
       <div className='p-3 border-b bg-muted/20'>
         <h3 className='font-medium text-sm'>Dados Estruturados</h3>
@@ -46,13 +52,14 @@ export function StructuredDataDisplay({ userStep }: StructuredDataDisplayProps) 
           icon={<Users className='h-4 w-4' />}
         />
 
-        {/* Outros Ativos */}
-        <OutrosAtivosSection
-          investimentos={data.investimentos}
-          outrosAtivos={data.outros_ativos}
-          icon={<CircleDollarSign className='h-4 w-4' />}
-        />
+          {/* Outros Ativos */}
+          <OutrosAtivosSection
+            investimentos={data.investimentos}
+            outrosAtivos={data.outros_ativos}
+            icon={<CircleDollarSign className='h-5 w-5' />}
+          />
+        </div>
       </div>
-    </div>
+    </>
   )
 }
