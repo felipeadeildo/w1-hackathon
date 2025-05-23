@@ -29,6 +29,7 @@ interface SidebarItem {
 const items: SidebarItem[] = [
   { title: 'Dashboard', url: '/app', icon: Home },
   { title: 'Onboarding', url: '/app/onboarding', icon: Users },
+  { title: 'Dashboard Admin', url: '/app/admin/dashboard', icon: Building2 },
   { title: 'Verificação de Documentos', url: '/app/admin/documents', icon: Building2 },
 ]
 

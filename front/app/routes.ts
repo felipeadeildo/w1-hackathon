@@ -8,7 +8,10 @@ export default [
     prefix('app', [
       index('routes/dashboard.tsx'),
       route('onboarding', 'routes/onboarding.tsx'),
-      ...prefix('admin', [route('documents', 'routes/admin-documents.tsx')]),
+      ...prefix('admin', [
+        route('dashboard', 'routes/admin-dashboard.tsx'),
+        route('documents', 'routes/admin-documents.tsx'),
+      ]),
     ]),
   ),
 ] satisfies RouteConfig
